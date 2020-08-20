@@ -6,6 +6,7 @@
 - h2
 
 ## 使用方式
+> 后面会制作docker镜像, 不会用的可以先star
 1. 本地安装jdk环境, maven
 2. 下载源码, 修改resources文件夹下的application.properties的spring.datasource.password为自己想要的密码
 2. 使用maven打包 mvn package
@@ -14,6 +15,7 @@
 5. 执行nohup java -jar forwordpanel-0.0.1-SNAPSHOT.jar&
 6. 初始化数据库, 访问ip:8080/h2 进入数据库管理, 用户名sa, 密码为上面修改的密码 将源码resources下的data.sql拷贝下来, 执行
 7. 访问ip:8080 登录吧, 默认登录账号为 admin XDZZ@123
+8. 交流群, 见issue
 
 ## 主要功能
 ### 1. 服务器管理

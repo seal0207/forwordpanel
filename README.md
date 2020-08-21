@@ -14,7 +14,7 @@
 4. 服务器安装open-jdk
 5. 执行nohup java -jar forwordpanel-0.0.1-SNAPSHOT.jar&
 6. 初始化数据库, 访问ip:8080/h2 进入数据库管理, 用户名sa, 密码为上面修改的密码 将源码resources下的data.sql拷贝下来, 执行
-7. 访问ip:8080 登录吧, 默认登录账号为 admin XDZZ@123
+7. 访问ip:8080 登录吧, 默认登录账号为 admin XIAOLIzz123
 8. 交流群, 见issue
 
 ## 主要功能

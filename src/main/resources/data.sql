@@ -93,6 +93,7 @@ alter table server add column key varchar(256) NOT NULL ;
 
 -- 07-22 local_port不再存储
 alter table user_port drop local_port;
+alter table user_port drop port_id;
 alter table user_port add local_port int default NULL;
 alter table user_port add port_id int default NULL;
 

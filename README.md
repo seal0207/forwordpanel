@@ -6,7 +6,7 @@
 - h2
 
 ## 使用方式
-> 后面会制作docker镜像, 不会用的可以先star
+> 后面会制作docker镜像, 现在可以先用release的jar, 从第4步开始, 自己编译从第一步开始
 1. 本地安装jdk环境, maven
 2. 下载源码, 修改resources文件夹下的application.properties的spring.datasource.password为自己想要的密码
 2. 使用maven打包 mvn package

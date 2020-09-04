@@ -10,7 +10,7 @@
 1. 本地安装jdk环境, maven
 2. 下载源码, 修改resources文件夹下的application.properties的spring.datasource.password为自己想要的密码
 2. 使用maven打包 mvn package
-3. 将target中打包好的jar forwordpanel-0.0.1-SNAPSHOT.jar拷贝到要部署的服务器
+3. 将target中打包好的jar(或者从release中下载) forwordpanel-0.0.1-SNAPSHOT.jar拷贝到要部署的服务器
 4. 服务器安装open-jdk
 5. 执行nohup java -jar forwordpanel-0.0.1-SNAPSHOT.jar&
 6. 初始化数据库, 访问ip:8080/h2 进入数据库管理, 用户名sa, 密码为上面修改的密码 将源码resources下的data.sql拷贝下来, 执行

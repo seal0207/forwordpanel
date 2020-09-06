@@ -232,4 +232,14 @@ public class UserService {
                 .eq(User::getDeleted, false).eq(User::getDisabled, false);
         return userDao.selectList(queryWrapper);
     }
+
+    /**
+     * 获取启用的用户
+     * @return
+     */
+    public List<User> findEnableUserList(){
+        LambdaQueryWrapper<User> queryWrapper = Wrappers.<User>lambdaQuery()
+                .eq(User::getDeleted, false).eq(User::getDisabled, false);
+        return userDao.selectList(queryWrapper);
+    }
 }

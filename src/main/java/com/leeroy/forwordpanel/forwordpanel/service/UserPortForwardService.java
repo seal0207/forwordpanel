@@ -65,9 +65,9 @@ public class UserPortForwardService {
         }
         List<UserPortForward> userPortForwardList = userPortForwardDao.selectList(queryWrapper);
         List<UserPortForwardDTO> userPortForwardDTOList = BeanCopyUtil.copyListProperties(userPortForwardList, UserPortForwardDTO::new);
-        Map<String, String> portFlowMap = getPortFlowMap(userPortForwardDTOList);
+        Map<UserPortForwardDTO, String> portFlowMap = getPortFlowMap(userPortForwardDTOList);
         for (UserPortForwardDTO userPortForward : userPortForwardDTOList) {
-            String flow = portFlowMap.get(userPortForward.getRemoteIp());
+            String flow = portFlowMap.get(userPortForward);
             userPortForward.setDataUsage(Long.valueOf(flow==null?"0":flow));
             Port port = portDao.selectById(userPortForward.getPortId());
             if(port!=null){
@@ -88,11 +88,24 @@ public class UserPortForwardService {
     }
 
     /**
+     * 查询用户流量转发
+     * @param userId
+     * @return
+     */
+    public List<UserPortForward> findUserForwardList(Integer userId) {
+        LambdaQueryWrapper<UserPortForward> queryWrapper;
+        queryWrapper = Wrappers.<UserPortForward>lambdaQuery().eq(UserPortForward::getUserId, userId)
+                .eq(UserPortForward::getDeleted, false);
+        return userPortForwardDao.selectList(queryWrapper);
+    }
+
+
+    /**
      * 获取流量
      * @return
      */
-    private Map<String, String> getPortFlowMap(List<UserPortForwardDTO> userPortForwardDTOList){
-        Map<String, String> result = new HashMap<>();
+    public Map<UserPortForwardDTO, String> getPortFlowMap(List<UserPortForwardDTO> userPortForwardDTOList) {
+        Map<UserPortForwardDTO, String> result = new HashMap<>();
         //根据server分组
         Map<Integer, List<UserPortForwardDTO>> portForwardMap = userPortForwardDTOList.stream().collect(Collectors.groupingBy(UserPortForwardDTO::getServerId));
         for (Integer serverId : portForwardMap.keySet()) {
@@ -100,10 +113,13 @@ public class UserPortForwardService {
             List<UserPortForwardDTO> userPortForwardDTOS = portForwardMap.get(serverId);
             List<String> remoteHostList = userPortForwardDTOS.stream().map(UserPortForwardDTO::getRemoteIp).collect(Collectors.toList());
             Map<String, String> portFlowMap = forwardService.getPortFlowMap(server, remoteHostList);
-            result.putAll(portFlowMap);
+            for (UserPortForwardDTO userPortForwardDTO : userPortForwardDTOS) {
+                result.put(userPortForwardDTO, portFlowMap.get(userPortForwardDTO.getRemoteIp()));
+            }
         }
         return result;
     }
+
 
 
     /**

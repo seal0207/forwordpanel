@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.leeroy.forwordpanel.forwordpanel.common.util.remotessh.SSHCommandExecutor;
 import com.leeroy.forwordpanel.forwordpanel.model.Server;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

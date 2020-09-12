@@ -50,7 +50,7 @@ public class UserService {
         if (baseAdminUsers.size() != 0) {
             PageInfo<User> pageInfo = new PageInfo<>(baseAdminUsers);
             pageDataResult.setList(baseAdminUsers);
-            pageDataResult.setTotals((int) pageInfo.getTotal());
+            pageDataResult.setTotal(pageInfo.getTotal());
         }
 
         return pageDataResult;

@@ -2,7 +2,7 @@
 基于Java编写的中转管理平台(中转面板), 用来加速国内服务
 使用的技术:
 - springboot
-- layui
+- element-ui
 - h2
 
 > 注意, 系统不必每个nat上都部署, 也不需要一定要部署在nat, 只要部署的机器能ssh上nat即可, 部署一套系统管理多个nat
@@ -19,7 +19,7 @@
 7. 访问ip:8080 登录吧, 默认登录账号为 admin XIAOLIzz123
 ### 2. DOCKER方式
 1. docker run -d -p 10203:8080 leeroydocker/forwordpanel:latest
-2. 访问ip:10203 登录吧, 默认登录账号为 admin XIAOLIzz123
+2. 访问ip:10203/index.html 登录吧, 默认登录账号为 admin XIAOLIzz123
 3. 交流群, 见issue
 
 ## 主要功能

@@ -12,15 +12,32 @@ public class Resource {
 
     private Integer id;
 
-    private String name;
+    private String title;
 
-    private String url;
+    private String path;
 
-    private List<Resource> childrens;
+    private boolean meta;
 
-    public Resource(Integer id, String name, String url) {
+    private boolean hidden;
+
+    private String icon;
+
+    private List<Resource> children;
+
+    public Resource(Integer id, String title, String path, boolean meta, boolean hidden) {
         this.id = id;
-        this.name = name;
-        this.url = url;
+        this.title = title;
+        this.path = path;
+        this.meta = meta;
+        this.hidden = hidden;
+    }
+
+    public Resource(Integer id, String title, String path, String icon) {
+        this.id = id;
+        this.title = title;
+        this.path = path;
+        this.meta = true;
+        this.hidden = false;
+        this.icon = icon;
     }
 }

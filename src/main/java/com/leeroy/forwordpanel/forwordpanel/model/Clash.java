@@ -29,12 +29,8 @@ public class Clash {
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date expireTime;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date createTime;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date updateTime;
     /**
      * 配置字符串

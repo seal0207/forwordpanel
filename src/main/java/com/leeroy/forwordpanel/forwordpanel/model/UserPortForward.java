@@ -31,12 +31,8 @@ public class UserPortForward {
     // 目标主机端口
     private Integer remotePort;
     // 创建时间
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date createTime;
     //更新时间
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Date updateTime;
     //删除表示
     private Boolean deleted;

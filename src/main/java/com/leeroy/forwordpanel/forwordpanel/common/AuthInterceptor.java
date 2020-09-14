@@ -43,15 +43,15 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
         }
         String token = TokenUtil.getToken(request);
         if (StringUtils.isEmpty(token)) {
-            response.sendRedirect("/login");
+            renderResponse(response, "403", "登录超时, 请重新登录");
             return false;
             //todo 跳转到登录
         }
         //根据token获取用户信息
-        UserToken userToken = userTokenService.getUserByToken(token);
+        UserToken userToken = userTokenService.getUserToken(token);
         if (Objects.isNull(userToken) || userToken.getUserId() == null) {
             //todo 跳转到登录页面
-            response.sendRedirect("/login");
+            renderResponse(response, "403", "登录超时, 请重新登录");
             return false;
         }
         //当前用户

@@ -35,24 +35,26 @@ public class UserPortService {
 
     /**
      * 给用户分配端口
-     * @param userPort
+     * @param userPortList
      */
-    public ApiResponse save(UserPort userPort) {
-        Port port = portDao.selectById(userPort.getPortId());
-        if (userPort.getId() == null) {
-            if (findByUserIdAndPort(userPort.getUserId(), userPort.getPortId()) != null) {
-                return ApiResponse.error("401","该端口已被分配");
+    public ApiResponse save(List<UserPort> userPortList) {
+        for (UserPort userPort : userPortList) {
+            if (userPort.getId() == null) {
+                if (findByUserIdAndPort(userPort.getUserId(), userPort.getPortId()) != null) {
+                    Port port = portDao.selectById(userPort.getPortId());
+                    return ApiResponse.error("401","端口:"+port.getLocalPort()+"已被分配");
+                }
+                userPort.setDeleted(false);
+                userPort.setDisabled(false);
+                userPort.setCreateTime(new Date());
+                userPortDao.insert(userPort);
+            } else {
+                userPort.setUpdateTime(new Date());
+                userPortDao.updateById(userPort);
             }
-            userPort.setDeleted(false);
-            userPort.setDisabled(false);
-            userPort.setCreateTime(new Date());
-            userPortDao.insert(userPort);
-        } else {
-            userPort.setUpdateTime(new Date());
-            userPortDao.updateById(userPort);
+            //创建中转记录
+            userPortForwardService.createUserPortForward(userPort.getServerId(), userPort.getPortId(), userPort.getUserId());
         }
-        //创建中转记录
-        userPortForwardService.createUserPortForward(userPort.getServerId(), userPort.getPortId(), userPort.getUserId());
         return ApiResponse.ok();
     }
 

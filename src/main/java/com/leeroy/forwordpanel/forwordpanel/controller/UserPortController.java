@@ -12,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @Title: UserController
  * @Description: 系统用户管理
@@ -26,17 +28,17 @@ public class UserPortController {
     @Autowired
     private UserPortService userPortService;
 
-    @GetMapping("getPortList")
+    @GetMapping("getList")
     public ApiResponse getUserPortList(Integer userId) {
         return ApiResponse.ok(userPortService.findUserPortList(userId));
     }
 
     @PostMapping("save")
-    public ApiResponse saveUserPort(@RequestBody UserPort userPort) {
+    public ApiResponse saveUserPort(@RequestBody List<UserPort> userPortList) {
         if(WebCurrentData.getUser().getUserType()>0){
             return ApiResponse.error("403", "您没有权限执行此操作");
         }
-        return userPortService.save(userPort);
+        return userPortService.save(userPortList);
     }
 
     @GetMapping("delete")
@@ -54,7 +56,7 @@ public class UserPortController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/disable", method = RequestMethod.POST)
+    @RequestMapping(value = "/disable", method = RequestMethod.GET)
     @ResponseBody
     public ApiResponse disable(@RequestParam("id") Integer id) {
         if(WebCurrentData.getUser().getUserType()>0){
@@ -69,7 +71,7 @@ public class UserPortController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/enable", method = RequestMethod.POST)
+    @RequestMapping(value = "/enable", method = RequestMethod.GET)
     @ResponseBody
     public ApiResponse enable(@RequestParam("id") Integer id) {
         if(WebCurrentData.getUser().getUserType()>0){

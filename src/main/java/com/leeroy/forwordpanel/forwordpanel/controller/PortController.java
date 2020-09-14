@@ -1,6 +1,8 @@
 package com.leeroy.forwordpanel.forwordpanel.controller;
 
+import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
+import com.leeroy.forwordpanel.forwordpanel.dto.PageRequest;
 import com.leeroy.forwordpanel.forwordpanel.model.Port;
 import com.leeroy.forwordpanel.forwordpanel.service.PortService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,41 +16,36 @@ public class PortController {
     @Autowired
     private PortService portService;
 
-    /**
-     * 页面
-     *
-     * @return
-     */
-    @RequestMapping("/manage")
-    public String portManage() {
-        return "port/index";
-    }
-
 
     @ResponseBody
-    @GetMapping("getList")
-    public ApiResponse getUserPortList(Integer userId) {
-        return ApiResponse.ok(portService.findList());
+    @PostMapping("getPage")
+    public ApiResponse getUserPortList(@RequestBody PageRequest pageRequest) {
+        return ApiResponse.ok(portService.findList(pageRequest));
     }
 
     @ResponseBody
     @GetMapping("getFreePortList")
-    public ApiResponse getFreePortList(Integer userId, Integer serverId) {
-        return ApiResponse.ok(portService.findFreePortList(serverId));
+    public ApiResponse getFreePortList() {
+        return ApiResponse.ok(portService.findFreePortList());
     }
 
 
     @ResponseBody
     @RequestMapping(value = "save", method = RequestMethod.POST)
     public ApiResponse saveUserPort(@RequestBody Port port) {
+        if(WebCurrentData.getUser().getUserType()>0){
+            return ApiResponse.error("403", "您没有权限执行此操作");
+        }
         return portService.save(port);
     }
 
     @ResponseBody
-    @PostMapping("delete")
+    @GetMapping("delete")
     public ApiResponse delete(Integer id) {
-        portService.delete(id);
-        return ApiResponse.ok();
+        if(WebCurrentData.getUser().getUserType()>0){
+            return ApiResponse.error("403", "您没有权限执行此操作");
+        }
+        return portService.delete(id);
     }
 
 

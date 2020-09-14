@@ -25,8 +25,8 @@ CREATE TABLE user_port  (
   disabled BOOLEAN ,
   deleted BOOLEAN ,
   expire_time DATE,
-  create_time DATE ,
-  update_time DATE
+  create_time TIMESTAMP ,
+  update_time TIMESTAMP
 );
 
 
@@ -51,8 +51,8 @@ CREATE TABLE user_port_forward  (
   data_usage BIGINT,
   disabled BOOLEAN ,
   deleted BOOLEAN ,
-  create_time DATE ,
-  update_time DATE
+  create_time TIMESTAMP ,
+  update_time TIMESTAMP
 );
 
 CREATE TABLE clash  (
@@ -63,8 +63,8 @@ CREATE TABLE clash  (
   disabled BOOLEAN ,
   deleted BOOLEAN ,
   expire_time DATE,
-  create_time DATE ,
-  update_time DATE
+  create_time TIMESTAMP ,
+  update_time TIMESTAMP
 );
 
 CREATE TABLE port  (
@@ -72,8 +72,8 @@ CREATE TABLE port  (
   local_port int NOT NULL ,
   internet_port int NOT NULL ,
   deleted BOOLEAN,
-  create_time DATE,
-  update_time DATE
+  create_time TIMESTAMP,
+  update_time TIMESTAMP
 );
 
 CREATE TABLE server(
@@ -83,8 +83,8 @@ CREATE TABLE server(
   port int NOT NULL ,
   state int NOT NULL DEFAULT 1 ,
   deleted BOOLEAN,
-  create_time DATE,
-  update_time DATE
+  create_time TIMESTAMP,
+  update_time TIMESTAMP
 );
 
 
@@ -108,8 +108,8 @@ CREATE TABLE user_server(
   user_id int NOT NULL ,
   server_id int NOT NULL DEFAULT 1 ,
   deleted BOOLEAN,
-  create_time DATE,
-  update_time DATE
+  create_time TIMESTAMP,
+  update_time TIMESTAMP
 );
 alter table server add column owner_id int;
 alter table port add column server_id int;

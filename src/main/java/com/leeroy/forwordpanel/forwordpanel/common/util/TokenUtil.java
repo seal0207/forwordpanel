@@ -31,7 +31,7 @@ public class TokenUtil {
      * @return
      */
     public static String getToken(HttpServletRequest request) {
-        return getTokenFromCookies(request);
+        return request.getHeader("X-Token");
     }
 
     private static String getTokenFromCookies(HttpServletRequest request) {

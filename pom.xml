@@ -21,10 +21,6 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
@@ -118,7 +114,7 @@
             <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>1.2.0</version>
+                <version>1.2.1</version>
                 <executions>
                     <execution>
                         <id>build-image</id>
@@ -129,7 +125,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <dockerHost>http://193.110.202.138:2375</dockerHost>
+<!--                    <dockerHost>http://193.110.202.138:2375</dockerHost>-->
                     <imageName>leeroydocker/${project.artifactId}</imageName>
                     <imageTags>
                         <imageTag>${project.version}</imageTag>

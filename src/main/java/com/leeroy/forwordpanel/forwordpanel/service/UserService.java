@@ -3,6 +3,7 @@ package com.leeroy.forwordpanel.forwordpanel.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
@@ -39,26 +40,22 @@ public class UserService {
     @Value("${panel.default-password}")
     private String defaultPassword;
 
-    public PageDataResult getUserList(UserSearchDTO userSearch, Integer pageNum, Integer pageSize) {
-        PageDataResult pageDataResult = new PageDataResult();
+    public PageInfo<User> getUserList(UserSearchDTO userSearch) {
         Integer userType = WebCurrentData.getUser().getUserType();
         if(userType>0){
             userSearch.setId(WebCurrentData.getUserId());
         }
+        Page<User> page = PageHelper.startPage(userSearch.getPageNum(), userSearch.getPageSize());
         List<User> baseAdminUsers = userDao.getUsers(userSearch);
-        PageHelper.startPage(pageNum, pageSize);
+        PageInfo<User> pageInfo = page.toPageInfo();
         if (baseAdminUsers.size() != 0) {
-            PageInfo<User> pageInfo = new PageInfo<>(baseAdminUsers);
-            pageDataResult.setList(baseAdminUsers);
-            pageDataResult.setTotals((int) pageInfo.getTotal());
+            pageInfo.setList(baseAdminUsers);
         }
-
-        return pageDataResult;
+        return pageInfo;
     }
 
 
     public ApiResponse addUser(User user) {
-        Map<String, Object> data = new HashMap();
         try {
             if(WebCurrentData.getUser().getUserType()>0){
                 return ApiResponse.error("403", "您没有权限新增用户");
@@ -111,8 +108,8 @@ public class UserService {
      */
     public ApiResponse updateUser(User user) {
         Integer id = user.getId();
-        if(WebCurrentData.getUser().getUserType()>0&&!WebCurrentData.getUserId().equals(id)){
-            return ApiResponse.error("403", "您没有权限修改其他用户");
+        if(WebCurrentData.getUser().getUserType()>0){
+            return ApiResponse.error("403", "您没有权限用户信息");
         }
         User old = userDao.getUserByUserName(user.getUsername(), id);
         if (old != null) {

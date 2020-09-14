@@ -32,18 +32,26 @@ public class LoginController {
     @NoAuth
     @PostMapping("/login")
     @ResponseBody
-    public ApiResponse login(LoginDTO loginDTO) {
+    public ApiResponse login(@RequestBody LoginDTO loginDTO) {
         return loginService.login(loginDTO);
+    }
+
+    @NoLogin
+    @NoAuth
+    @GetMapping("/authToken")
+    @ResponseBody
+    public ApiResponse authToken(String token){
+        return ApiResponse.ok(userTokenService.getUserByToken(token));
     }
 
     @RequestMapping("/logout")
     @NoLogin
-    public ModelAndView logout(HttpServletRequest request) {
+    public ApiResponse logout(HttpServletRequest request) {
         String token = TokenUtil.getToken(request);
         userTokenService.delToken(token);
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("login");
-        return modelAndView;
+        return ApiResponse.ok();
     }
 
 }

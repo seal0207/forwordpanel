@@ -14,7 +14,7 @@ public class PageDataResult {
     private Integer code=200;
 
     //总记录数量
-    private Integer totals;
+    private Long total;
 
     private List<?> list;
 
@@ -26,12 +26,12 @@ public class PageDataResult {
         this.code = code;
     }
 
-    public Integer getTotals() {
-        return totals;
+    public Long getTotal() {
+        return total;
     }
 
-    public void setTotals(Integer totals) {
-        this.totals = totals;
+    public void setTotal(Long total) {
+        this.total = total;
     }
 
     public List <?> getList() {
@@ -46,7 +46,7 @@ public class PageDataResult {
     public String toString() {
         return "PageDataResult{" +
                 "code=" + code +
-                ", totals=" + totals +
+                ", totals=" + total +
                 ", list=" + list +
                 '}';
     }

@@ -47,6 +47,10 @@ public class LoginService {
         return ApiResponse.ok(userToken);
     }
 
+    public ApiResponse authToken(String token){
+        return  ApiResponse.ok(userTokenService.getUserByToken(token));
+    }
+
     /**
      * 登出
      *

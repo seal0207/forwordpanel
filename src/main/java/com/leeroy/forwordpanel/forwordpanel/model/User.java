@@ -76,8 +76,6 @@ public class User {
     /**
      * 到期时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date expireTime;
 
 }

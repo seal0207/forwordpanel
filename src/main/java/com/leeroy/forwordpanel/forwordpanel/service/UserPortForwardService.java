@@ -3,10 +3,14 @@ package com.leeroy.forwordpanel.forwordpanel.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
 import com.leeroy.forwordpanel.forwordpanel.common.util.BeanCopyUtil;
 import com.leeroy.forwordpanel.forwordpanel.dao.*;
+import com.leeroy.forwordpanel.forwordpanel.dto.PageRequest;
 import com.leeroy.forwordpanel.forwordpanel.dto.UserPortForwardDTO;
 import com.leeroy.forwordpanel.forwordpanel.model.*;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +57,7 @@ public class UserPortForwardService {
      *
      * @return
      */
-    public ApiResponse<List<UserPortForwardDTO>> getUserForwardList() {
+    public ApiResponse getUserForwardList(PageRequest pageRequest) {
         Integer userId = WebCurrentData.getUserId();
         LambdaQueryWrapper<UserPortForward> queryWrapper;
         if (WebCurrentData.getUser().getUserType() == 0) {
@@ -63,6 +67,8 @@ public class UserPortForwardService {
             queryWrapper = Wrappers.<UserPortForward>lambdaQuery().eq(UserPortForward::getUserId, userId)
                     .eq(UserPortForward::getDeleted, false);
         }
+        Page page = PageHelper.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+        PageInfo pageInfo = page.toPageInfo();
         List<UserPortForward> userPortForwardList = userPortForwardDao.selectList(queryWrapper);
         List<UserPortForwardDTO> userPortForwardDTOList = BeanCopyUtil.copyListProperties(userPortForwardList, UserPortForwardDTO::new);
         Map<UserPortForwardDTO, String> portFlowMap = getPortFlowMap(userPortForwardDTOList);
@@ -84,7 +90,8 @@ public class UserPortForwardService {
             }
             userPortForward.setInternetPort(port.getInternetPort());
         }
-        return ApiResponse.ok(userPortForwardDTOList);
+        pageInfo.setList(userPortForwardDTOList);
+        return ApiResponse.ok(pageInfo);
     }
 
     /**

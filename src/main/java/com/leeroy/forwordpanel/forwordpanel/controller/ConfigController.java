@@ -1,8 +1,9 @@
 package com.leeroy.forwordpanel.forwordpanel.controller;
 
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
+import com.leeroy.forwordpanel.forwordpanel.dto.PageRequest;
 import com.leeroy.forwordpanel.forwordpanel.model.Clash;
-import com.leeroy.forwordpanel.forwordpanel.service.ClashService;
+import com.leeroy.forwordpanel.forwordpanel.service.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -11,47 +12,38 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 
+@RequestMapping("config")
 @Controller
-public class ClashController {
+public class ConfigController {
 
     @Autowired
-    private ClashService clashService;
-
-    /**
-     * 中转管理
-     *
-     * @return
-     */
-    @RequestMapping("/clashManage")
-    public String userManage() {
-        return "clash/index";
-    }
+    private ConfigService configService;
 
 
     @ResponseBody
-    @GetMapping("getClashList")
-    public ApiResponse getUserPortList(Integer userId) {
-        return ApiResponse.ok(clashService.findClashList());
+    @PostMapping("getPage")
+    public ApiResponse getPage(@RequestBody PageRequest pageRequest) {
+        return ApiResponse.ok(configService.findClashList(pageRequest));
     }
 
     @ResponseBody
-    @PostMapping("saveClash")
-    public ApiResponse saveUserPort(@RequestBody Clash clash) {
-        return clashService.save(clash);
+    @PostMapping("save")
+    public ApiResponse save(@RequestBody Clash clash) {
+        return configService.save(clash);
     }
 
     @ResponseBody
-    @PostMapping("deleteClash")
+    @GetMapping("delete")
     public ApiResponse delete(String id) {
-        clashService.delClash(id);
+        configService.delClash(id);
         return ApiResponse.ok();
     }
 
 
     @ResponseBody
-    @GetMapping("clash/{id}")
+    @GetMapping("/{id}")
     public void getClashFileById(@PathVariable String id, HttpServletResponse response) {
-        Clash clash = clashService.findClashById(id);
+        Clash clash = configService.findClashById(id);
         try {
             String text = clash.getText();
             byte[] bytes = text.getBytes("UTF-8");

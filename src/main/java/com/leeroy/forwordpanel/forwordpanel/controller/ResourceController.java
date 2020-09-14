@@ -27,21 +27,17 @@ public class ResourceController {
         List<Resource> adminResourceList = new ArrayList<>();
         adminResourceList.add(new Resource(1, "看板", "/dashboard", "dashboard"));
         adminResourceList.add(new Resource(2, "服务器管理", "/server", "el-icon-cpu"));
-        adminResourceList.add(new Resource(3, "端口管理", "/port/manage", "el-icon-s-help"));
-        adminResourceList.add(new Resource(4, "账号管理", "/user/userManage", "el-icon-user-solid"));
-        adminResourceList.add(new Resource(5, "中转管理", "/portForwardManage", "el-icon-attract"));
-        adminResourceList.add(new Resource(6, "配置文件", "/clashManage", "el-icon-tickets"));
+        adminResourceList.add(new Resource(3, "端口管理", "/port", "el-icon-s-help"));
+        adminResourceList.add(new Resource(4, "账号管理", "/user", "el-icon-user-solid"));
+        adminResourceList.add(new Resource(5, "中转管理", "/forward", "el-icon-attract"));
+        adminResourceList.add(new Resource(6, "配置文件", "/config", "el-icon-tickets"));
 
 
         USER_TYPE_RESOURCE.put(0, adminResourceList);
-
         List<Resource> userResourceList = new ArrayList<>();
-        Resource userSystemManage = new Resource(1, "系统管理", "", "form");
-        List<Resource> userSystemManageChildList = new ArrayList<>();
-        userSystemManageChildList.add(new Resource(5, "中转管理", "/portForwardManage", "form"));
-        userSystemManageChildList.add(new Resource(6, "配置文件", "/clashManage", "form"));
-        userSystemManage.setChildren(userSystemManageChildList);
-        userResourceList.add(userSystemManage);
+        userResourceList.add(new Resource(1, "看板", "/dashboard", "dashboard"));
+        userResourceList.add(new Resource(5, "中转管理", "/forward", "el-icon-attract"));
+        userResourceList.add(new Resource(6, "配置文件", "/config", "el-icon-tickets"));
         USER_TYPE_RESOURCE.put(1, userResourceList);
     }
 

@@ -3,12 +3,9 @@ package com.leeroy.forwordpanel.forwordpanel.controller;
 
 import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
-import com.leeroy.forwordpanel.forwordpanel.common.response.PageDataResult;
-import com.leeroy.forwordpanel.forwordpanel.dao.UserPortDao;
 import com.leeroy.forwordpanel.forwordpanel.dto.UserPortDTO;
 import com.leeroy.forwordpanel.forwordpanel.dto.UserSearchDTO;
 import com.leeroy.forwordpanel.forwordpanel.model.User;
-import com.leeroy.forwordpanel.forwordpanel.model.UserPort;
 import com.leeroy.forwordpanel.forwordpanel.service.UserPortService;
 import com.leeroy.forwordpanel.forwordpanel.service.UserService;
 import org.slf4j.Logger;
@@ -16,10 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -77,31 +71,14 @@ public class UserController {
     /**
      * 用户分页
      *
-     * @param pageNum
-     * @param pageSize
      * @param userSearch
      * @return
      */
-    @RequestMapping(value = "/getUserList", method = RequestMethod.POST)
+    @RequestMapping(value = "/getPage", method = RequestMethod.POST)
     @ResponseBody
-    public PageDataResult getUserList(@RequestParam("pageNum") Integer pageNum, @RequestParam("pageSize") Integer pageSize, UserSearchDTO userSearch) {
-        PageDataResult pdr = new PageDataResult();
-        try {
-            if (null == pageNum) {
-                pageNum = 1;
-            }
-            if (null == pageSize) {
-                pageSize = 10;
-            }
-            // 获取用户列表
-            pdr = userService.getUserList(userSearch, pageNum, pageSize);
-            logger.info("用户列表查询=pdr:" + pdr);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.error("用户列表查询异常！", e);
-        }
-        return pdr;
+    public ApiResponse getUserList(@RequestBody UserSearchDTO userSearch) {
+        // 获取用户列表
+        return ApiResponse.ok(userService.getUserList(userSearch));
     }
 
 
@@ -111,11 +88,10 @@ public class UserController {
      * @param user
      * @return
      */
-    @RequestMapping(value = "/setUser", method = RequestMethod.POST)
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
     @ResponseBody
-    public ApiResponse setUser(User user) {
+    public ApiResponse setUser(@RequestBody User user) {
         logger.info("设置用户[新增或更新]！user:" + user);
-        Map<String, Object> data = new HashMap();
         if (user.getId() == null) {
             return userService.addUser(user);
         } else {
@@ -130,9 +106,12 @@ public class UserController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/disable", method = RequestMethod.POST)
+    @RequestMapping(value = "/disable", method = RequestMethod.GET)
     @ResponseBody
     public ApiResponse disable(@RequestParam("id") Integer id) {
+        if(WebCurrentData.getUser().getUserType()>0){
+            return ApiResponse.error("403", "您没有权限执行此操作");
+        }
          return userService.disableUser(id);
     }
 
@@ -142,9 +121,12 @@ public class UserController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/enable", method = RequestMethod.POST)
+    @RequestMapping(value = "/enable", method = RequestMethod.GET)
     @ResponseBody
     public ApiResponse enable(@RequestParam("id") Integer id) {
+        if(WebCurrentData.getUser().getUserType()>0){
+            return ApiResponse.error("403", "您没有权限执行此操作");
+        }
         return userService.enableUser(id);
     }
 
@@ -155,9 +137,12 @@ public class UserController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    @GetMapping(value = "/delete")
     @ResponseBody
     public ApiResponse delete(@RequestParam("id") Integer id) {
+        if(WebCurrentData.getUser().getUserType()>0){
+            return ApiResponse.error("403", "您没有权限执行此操作");
+        }
         List<UserPortDTO> userPortList = userPortService.findUserPortList(id);
         if(!CollectionUtils.isEmpty(userPortList)){
             return ApiResponse.error("401", "请先删除用户端口");

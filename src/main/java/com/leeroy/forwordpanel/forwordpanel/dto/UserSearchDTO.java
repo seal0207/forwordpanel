@@ -11,7 +11,7 @@ import lombok.Data;
  * @date: 2018/11/21 11:19
  */
 @Data
-public class UserSearchDTO {
+public class UserSearchDTO extends PageRequest {
     private String username;
 
     private String userPhone;

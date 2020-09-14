@@ -2,20 +2,25 @@ package com.leeroy.forwordpanel.forwordpanel.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
 import com.leeroy.forwordpanel.forwordpanel.dao.ClashDao;
+import com.leeroy.forwordpanel.forwordpanel.dto.PageRequest;
 import com.leeroy.forwordpanel.forwordpanel.model.Clash;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Date;
 import java.util.List;
 
 @Service
-public class ClashService {
+public class ConfigService {
 
     @Autowired
     private ClashDao clashDao;
@@ -46,11 +51,14 @@ public class ClashService {
      *
      * @return
      */
-    public List<Clash> findClashList() {
+    public PageInfo findClashList(PageRequest pageRequest) {
         Integer userId = WebCurrentData.getUserId();
-        LambdaQueryWrapper<Clash> queryWrapper = Wrappers.<Clash>lambdaQuery().eq(Clash::getUserId, userId)
-                .eq(Clash::getDeleted, false);
-        return clashDao.selectList(queryWrapper);
+        LambdaQueryWrapper<Clash> queryWrapper = Wrappers.<Clash>lambdaQuery().eq(Clash::getUserId, userId).eq(Clash::getDeleted, false);
+        Page page = PageHelper.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+        List<Clash> clashList = clashDao.selectList(queryWrapper);
+        PageInfo pageInfo = page.toPageInfo();
+        pageInfo.setList(clashList);
+        return pageInfo;
     }
 
     /**

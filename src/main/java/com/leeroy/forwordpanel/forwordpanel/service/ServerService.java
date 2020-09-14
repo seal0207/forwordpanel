@@ -9,15 +9,19 @@ import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
 import com.leeroy.forwordpanel.forwordpanel.common.response.PageDataResult;
 import com.leeroy.forwordpanel.forwordpanel.dao.ServerDao;
+import com.leeroy.forwordpanel.forwordpanel.dao.UserPortDao;
 import com.leeroy.forwordpanel.forwordpanel.dao.UserServerDao;
 import com.leeroy.forwordpanel.forwordpanel.dto.PageRequest;
+import com.leeroy.forwordpanel.forwordpanel.dto.UserPortDTO;
 import com.leeroy.forwordpanel.forwordpanel.dto.UserSearchDTO;
 import com.leeroy.forwordpanel.forwordpanel.model.Server;
 import com.leeroy.forwordpanel.forwordpanel.model.User;
+import com.leeroy.forwordpanel.forwordpanel.model.UserPort;
 import com.leeroy.forwordpanel.forwordpanel.model.UserServer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
@@ -33,6 +37,9 @@ public class ServerService {
 
     @Autowired
     private UserServerDao userServerDao;
+
+    @Autowired
+    private UserPortDao userPortDao;
 
 
     /**
@@ -115,13 +122,20 @@ public class ServerService {
     /**
      * 删除clash
      */
-    public void delete(Integer id) {
+    public ApiResponse delete(Integer id) {
+        LambdaQueryWrapper<UserPort> queryWrapper = Wrappers.<UserPort>lambdaQuery().eq(UserPort::getServerId, id)
+                .eq(UserPort::getDeleted, false);
+        List<UserPort> userPorts = userPortDao.selectList(queryWrapper);
+        if(!CollectionUtils.isEmpty(userPorts)){
+            return ApiResponse.error("403", "服务端口已授权给用户, 请先删除");
+        }
         Server userPort = new Server();
         userPort.setId(id);
         userPort.setDeleted(true);
         serverDao.updateById(userPort);
         LambdaQueryWrapper<UserServer> userServerQueryWrapper = Wrappers.<UserServer>lambdaQuery().eq(UserServer::getDeleted, false).eq(UserServer::getServerId, id);
         userServerDao.delete(userServerQueryWrapper);
+        return ApiResponse.ok();
     }
 
 }

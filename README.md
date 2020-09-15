@@ -55,8 +55,3 @@
 ### 4.配置管理
 可以托管一些配置, 这个自己灵活运用
 
-![dJMS8s.png](https://s1.ax1x.com/2020/08/20/dJMS8s.png)
-![dJMtGd.png](https://s1.ax1x.com/2020/08/20/dJMtGd.png)
-![dJMgRs.png](https://s1.ax1x.com/2020/08/20/dJMgRs.png)
-![dJM5ZT.png](https://s1.ax1x.com/2020/08/20/dJM5ZT.png)
-![dJMjL6.png](https://s1.ax1x.com/2020/08/20/dJMjL6.png)

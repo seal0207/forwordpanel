@@ -1,4 +1,10 @@
 # 闲(的)蛋(疼)中转面板
+演示地址: http://uovz.xiaolifly.xyz:10203/
+
+用户名: admin
+
+密码: admin123
+
 基于Java编写的中转管理平台(中转面板), 用来加速国内服务
 使用的技术:
 - springboot

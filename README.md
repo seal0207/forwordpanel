@@ -18,9 +18,20 @@
 6. 初始化数据库, 访问ip:8080/h2 进入数据库管理, 用户名sa, 密码为上面修改的密码 将源码resources下的data.sql拷贝下来, 执行
 7. 访问ip:8080 登录吧, 默认登录账号为 admin XIAOLIzz123
 ### 2. DOCKER方式
+#### 2.1 安装启动
 1. docker run -d -p 10203:8080 leeroydocker/forwordpanel:latest
-2. 访问ip:10203/index.html 登录吧, 默认登录账号为 admin XIAOLIzz123
+2. 访问ip:10203 登录吧, 默认登录账号为 admin XIAOLIzz123
 3. 交流群, 见issue
+
+#### 2.2镜像升级
+1. docker pull leeroydocker/forwordpanel:latest
+2. 命令行输入docker ps 回车, 获取当前forwordpanel的实例id, 比如是aaa
+3. 从实例中拷贝出数据库文件 docker cp aaa:/forward_db.mv.db .
+4. 停止实例  docker stop aaa
+5. 使用新镜像启动实例  docker run -d -p 10203:8080 leeroydocker/forwordpanel:latest
+6. 命令行输入docker ps 回车, 获取当前forwordpanel的实例id, 比如是bbb
+7. 将之前的数据库拷贝进去  docker cp forward_db.mv.db bbb:/forward_db.mv.db
+8. 重启  docker restart bbb
 
 ## 主要功能
 ### 1. 服务器管理

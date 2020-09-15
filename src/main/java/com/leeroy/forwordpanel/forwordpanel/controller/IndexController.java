@@ -27,12 +27,6 @@ public class IndexController {
         return "login";
     }
 
-    @RequestMapping("/")
-    public String index(){
-        logger.info("定向主页");
-
-        return "home";
-    }
 
     @RequestMapping("home")
     public String home(Model model){

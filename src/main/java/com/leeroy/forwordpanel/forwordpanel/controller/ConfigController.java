@@ -1,5 +1,6 @@
 package com.leeroy.forwordpanel.forwordpanel.controller;
 
+import com.leeroy.forwordpanel.forwordpanel.common.annotation.NoLogin;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
 import com.leeroy.forwordpanel.forwordpanel.dto.PageRequest;
 import com.leeroy.forwordpanel.forwordpanel.model.Clash;
@@ -40,6 +41,7 @@ public class ConfigController {
     }
 
 
+    @NoLogin
     @ResponseBody
     @GetMapping("/{id}")
     public void getClashFileById(@PathVariable String id, HttpServletResponse response) {

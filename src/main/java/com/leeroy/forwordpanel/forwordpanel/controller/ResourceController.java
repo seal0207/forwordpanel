@@ -31,6 +31,7 @@ public class ResourceController {
         adminResourceList.add(new Resource(4, "账号管理", "/user", "el-icon-user-solid"));
         adminResourceList.add(new Resource(5, "中转管理", "/forward", "el-icon-attract"));
         adminResourceList.add(new Resource(6, "配置文件", "/config", "el-icon-tickets"));
+        adminResourceList.add(new Resource(7, "系统设置", "/system", "el-icon-s-tools"));
 
 
         USER_TYPE_RESOURCE.put(0, adminResourceList);

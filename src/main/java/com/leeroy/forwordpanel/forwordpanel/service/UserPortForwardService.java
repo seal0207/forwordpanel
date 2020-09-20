@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
 import com.leeroy.forwordpanel.forwordpanel.common.util.BeanCopyUtil;
@@ -52,6 +53,9 @@ public class UserPortForwardService {
     @Autowired
     private RemoteForwardService forwardService;
 
+    @Autowired
+    ForwardFlowService forwardFlowService;
+
     /**
      * 查询用户中转
      *
@@ -71,20 +75,20 @@ public class UserPortForwardService {
         PageInfo pageInfo = page.toPageInfo();
         List<UserPortForward> userPortForwardList = userPortForwardDao.selectList(queryWrapper);
         List<UserPortForwardDTO> userPortForwardDTOList = BeanCopyUtil.copyListProperties(userPortForwardList, UserPortForwardDTO::new);
-        Map<UserPortForwardDTO, String> portFlowMap = getPortFlowMap(userPortForwardDTOList);
+        Map<Integer, String> portFlowMap = getPortFlowMap(userPortForwardList);
         for (UserPortForwardDTO userPortForward : userPortForwardDTOList) {
-            String flow = portFlowMap.get(userPortForward);
-            userPortForward.setDataUsage(Long.valueOf(flow==null?"0":flow));
+            String flow = portFlowMap.get(userPortForward.getId());
+            userPortForward.setDataUsage(Long.valueOf(flow == null ? "0" : flow));
             Port port = portDao.selectById(userPortForward.getPortId());
-            if(port!=null){
+            if (port != null) {
                 userPortForward.setLocalPort(port.getLocalPort());
             }
             User user = userDao.selectById(userPortForward.getUserId());
-            if(user!=null){
+            if (user != null) {
                 userPortForward.setUsername(user.getUsername());
             }
             Server server = serverDao.selectById(userPortForward.getServerId());
-            if(server!=null){
+            if (server != null) {
                 userPortForward.setServerHost(server.getHost());
                 userPortForward.setServerName(server.getServerName());
             }
@@ -96,37 +100,38 @@ public class UserPortForwardService {
 
     /**
      * 查询用户流量转发
+     *
      * @param userId
      * @return
      */
     public List<UserPortForward> findUserForwardList(Integer userId) {
         LambdaQueryWrapper<UserPortForward> queryWrapper;
         queryWrapper = Wrappers.<UserPortForward>lambdaQuery().eq(UserPortForward::getUserId, userId)
-                .eq(UserPortForward::getDeleted, false);
+                .eq(UserPortForward::getDeleted, false).isNotNull(UserPortForward::getRemoteIp);
         return userPortForwardDao.selectList(queryWrapper);
     }
 
 
     /**
      * 获取流量
+     *
      * @return
      */
-    public Map<UserPortForwardDTO, String> getPortFlowMap(List<UserPortForwardDTO> userPortForwardDTOList) {
-        Map<UserPortForwardDTO, String> result = new HashMap<>();
+    public Map<Integer, String> getPortFlowMap(List<UserPortForward> userPortForwardDTOList) {
+        Map<Integer, String> result = new HashMap<>();
         //根据server分组
-        Map<Integer, List<UserPortForwardDTO>> portForwardMap = userPortForwardDTOList.stream().collect(Collectors.groupingBy(UserPortForwardDTO::getServerId));
+        Map<Integer, List<UserPortForward>> portForwardMap = userPortForwardDTOList.stream().collect(Collectors.groupingBy(UserPortForward::getServerId));
         for (Integer serverId : portForwardMap.keySet()) {
             Server server = serverDao.selectById(serverId);
-            List<UserPortForwardDTO> userPortForwardDTOS = portForwardMap.get(serverId);
-            List<String> remoteHostList = userPortForwardDTOS.stream().map(UserPortForwardDTO::getRemoteIp).collect(Collectors.toList());
+            List<UserPortForward> userPortForwardDTOS = portForwardMap.get(serverId);
+            List<String> remoteHostList = userPortForwardDTOS.stream().map(UserPortForward::getRemoteIp).collect(Collectors.toList());
             Map<String, String> portFlowMap = forwardService.getPortFlowMap(server, remoteHostList);
-            for (UserPortForwardDTO userPortForwardDTO : userPortForwardDTOS) {
-                result.put(userPortForwardDTO, portFlowMap.get(userPortForwardDTO.getRemoteIp()));
+            for (UserPortForward userPortForward : userPortForwardDTOS) {
+                result.put(userPortForward.getId(), portFlowMap.get(userPortForward.getRemoteIp()));
             }
         }
         return result;
     }
-
 
 
     /**
@@ -135,7 +140,7 @@ public class UserPortForwardService {
      * @param portId
      * @param userId
      */
-    public void createUserPortForward(Integer serverId,Integer portId, Integer userId) {
+    public void createUserPortForward(Integer serverId, Integer portId, Integer userId) {
         LambdaQueryWrapper<UserPortForward> queryWrapper = Wrappers.<UserPortForward>lambdaQuery().eq(UserPortForward::getUserId, userId)
                 .eq(UserPortForward::getPortId, portId).eq(UserPortForward::getDeleted, false);
         UserPortForward exist = userPortForwardDao.selectOne(queryWrapper);
@@ -187,7 +192,6 @@ public class UserPortForwardService {
             return apiResponse;
         }
         User user = WebCurrentData.getUser();
-        if (user.getUserType() > 0) {
             Integer userId = WebCurrentData.getUserId();
             //检查用户是否拥有此端口
             LambdaQueryWrapper<UserPort> userPortQueryWrapper = Wrappers.<UserPort>lambdaQuery().eq(UserPort::getUserId, userId)
@@ -203,10 +207,10 @@ public class UserPortForwardService {
                     break;
                 }
             }
+        if (user.getUserType() > 0) {
             if (!hasPort) {
                 return ApiResponse.error("403", "用户没有此端口的权限");
             }
-
         }
         if (StringUtils.isBlank(userPortForward.getRemoteHost()) || userPortForward.getRemotePort() == null) {
             return ApiResponse.error("401", "请填写域名(IP)|端口");
@@ -215,6 +219,8 @@ public class UserPortForwardService {
         LambdaQueryWrapper<UserPortForward> queryWrapper = Wrappers.<UserPortForward>lambdaQuery()
                 .eq(UserPortForward::getPortId, userPortForward.getPortId()).eq(UserPortForward::getDeleted, false);
         UserPortForward portForward = userPortForwardDao.selectOne(queryWrapper);
+        //收集之前的流量
+        forwardFlowService.collectForwardFlow(Lists.newArrayList(portForward));
         if (!portForward.getDisabled()) {
             //停止中转
             Port port = portDao.selectById(portForward.getPortId());
@@ -273,7 +279,7 @@ public class UserPortForwardService {
      * @return
      */
     private ApiResponse permissionCheck(Integer userId) {
-        if (WebCurrentData.getUser().getUserType() > 0 && !WebCurrentData.getUserId().equals(userId)) {
+        if (WebCurrentData.getUser() != null && WebCurrentData.getUser().getUserType() > 0 && !WebCurrentData.getUserId().equals(userId)) {
             return ApiResponse.error("403", "您没有权限执行该操作");
         }
         return ApiResponse.ok();

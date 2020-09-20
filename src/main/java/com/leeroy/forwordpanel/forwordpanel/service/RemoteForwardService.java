@@ -1,6 +1,7 @@
 package com.leeroy.forwordpanel.forwordpanel.service;
 
 import com.alibaba.fastjson.JSON;
+import com.leeroy.forwordpanel.forwordpanel.common.util.ShellUtil;
 import com.leeroy.forwordpanel.forwordpanel.common.util.remotessh.SSHCommandExecutor;
 import com.leeroy.forwordpanel.forwordpanel.model.Server;
 import lombok.extern.slf4j.Slf4j;
@@ -119,9 +120,8 @@ public class RemoteForwardService {
      */
     public void resetFlowCount(Server server, String remoteHost, Integer remotePort) {
         SSHCommandExecutor sshExecutor = getSshExecutor(server);
-        sshExecutor.execute(String.format("iptables -Z FORWARD -p tcp --dport %s -d %s", remotePort, remoteHost));
-        sshExecutor.execute(String.format("iptables -Z FORWARD -p udp --dport %s -d %s", remotePort, remoteHost));
-    }
+        sshExecutor.execute(String.format("iptables -D FORWARD -s %s", remoteHost), String.format("iptables -I FORWARD -s %s", remoteHost));
+        }
 
     /**
      * 重置流量
@@ -131,8 +131,7 @@ public class RemoteForwardService {
      */
     public void deleteFlowCount(Server server, String remoteHost, Integer remotePort) {
         SSHCommandExecutor sshExecutor = getSshExecutor(server);
-        sshExecutor.execute(String.format("iptables -D FORWARD -p tcp --dport %s -d %s", remotePort, remoteHost));
-        sshExecutor.execute(String.format("iptables -D FORWARD -p udp --dport %s -d %s", remotePort, remoteHost));
+        sshExecutor.execute(String.format("iptables -D FORWARD -p tcp --dport %s -d %s", remotePort, remoteHost), String.format("iptables -D FORWARD -p udp --dport %s -d %s", remotePort, remoteHost));
     }
 
 

@@ -33,6 +33,9 @@ public class UserPortService {
     @Autowired
     private UserPortForwardService userPortForwardService;
 
+    @Autowired
+    private ForwardService forwardService;
+
     /**
      * 给用户分配端口
      * @param userPortList
@@ -145,6 +148,7 @@ public class UserPortService {
         }
         return ApiResponse.ok();
     }
+
 
     /**
      * 启用用户

@@ -149,4 +149,19 @@ public class UserController {
         }
         return userService.delUser(id);
     }
+
+    /**
+     * 启用用户
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping(value = "/resetFlow")
+    @ResponseBody
+    public ApiResponse resetFlow(@RequestParam("id") Integer id) {
+        if (WebCurrentData.getUser().getUserType() > 0) {
+            return ApiResponse.error("403", "您没有权限执行此操作");
+        }
+        return userService.resetUserFlow(id);
+    }
 }

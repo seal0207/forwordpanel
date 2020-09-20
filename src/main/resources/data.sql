@@ -42,7 +42,7 @@ CREATE TABLE user_token  (
 
 CREATE TABLE user_port_forward  (
   id int NOT NULL AUTO_INCREMENT ,
-    user_id int NOT NULL ,
+  user_id int NOT NULL ,
   local_port int NOT NULL,
   remote_ip varchar(64),
   remote_host varchar(64),
@@ -99,7 +99,6 @@ alter table user_port add port_id int default NULL;
 
 alter table user_port_forward drop local_port;
 alter table user_port_forward add local_port int default NULL;
-delete from user_port_forward;
 alter table user_port_forward add port_id int NOT NULL;
 
 -- 07-28 增加user_server
@@ -118,3 +117,21 @@ alter table user_port_forward add server_id int default NULL;
 
 alter table server add column username varchar(128);
 alter table server add column password varchar(128);
+
+CREATE TABLE forward_flow  (
+  id int NOT NULL AUTO_INCREMENT ,
+  forward_id int not NULL,
+  user_id int NOT NULL ,
+  local_port int default NULL,
+  remote_ip varchar(64),
+  remote_host varchar(64),
+  port_id int NOT NULL,
+  remote_port int,
+  data_limit BIGINT,
+  data_usage BIGINT,
+  disabled BOOLEAN ,
+  deleted BOOLEAN ,
+  server_id int default NULL,
+  create_time TIMESTAMP ,
+  update_time TIMESTAMP
+);

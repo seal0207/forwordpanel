@@ -10,9 +10,12 @@ import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
 import com.leeroy.forwordpanel.forwordpanel.common.response.PageDataResult;
 import com.leeroy.forwordpanel.forwordpanel.common.util.DigestUtils;
+import com.leeroy.forwordpanel.forwordpanel.dao.ServerDao;
 import com.leeroy.forwordpanel.forwordpanel.dao.UserDao;
 import com.leeroy.forwordpanel.forwordpanel.dto.UserSearchDTO;
+import com.leeroy.forwordpanel.forwordpanel.model.Server;
 import com.leeroy.forwordpanel.forwordpanel.model.User;
+import com.leeroy.forwordpanel.forwordpanel.model.UserPortForward;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,8 +40,20 @@ public class UserService {
     @Autowired
     UserDao userDao;
 
+    @Autowired
+    ServerDao serverDao;
+
+    @Autowired
+    private ForwardFlowService forwardFlowService;
+
     @Value("${panel.default-password}")
     private String defaultPassword;
+
+    @Autowired
+    private RemoteForwardService remoteForwardService;
+
+    @Autowired
+    private UserPortForwardService userPortForwardService;
 
     public PageInfo<User> getUserList(UserSearchDTO userSearch) {
         Integer userType = WebCurrentData.getUser().getUserType();
@@ -47,6 +62,10 @@ public class UserService {
         }
         Page<User> page = PageHelper.startPage(userSearch.getPageNum(), userSearch.getPageSize());
         List<User> baseAdminUsers = userDao.getUsers(userSearch);
+        //统计流量
+        for (User baseAdminUser : baseAdminUsers) {
+            baseAdminUser.setDataUsage(forwardFlowService.getUserFlowTotal(baseAdminUser.getId()));
+        }
         PageInfo<User> pageInfo = page.toPageInfo();
         if (baseAdminUsers.size() != 0) {
             pageInfo.setList(baseAdminUsers);
@@ -238,5 +257,21 @@ public class UserService {
         LambdaQueryWrapper<User> queryWrapper = Wrappers.<User>lambdaQuery()
                 .eq(User::getDeleted, false).eq(User::getDisabled, false);
         return userDao.selectList(queryWrapper);
+    }
+
+    /**
+     * 禁用用户所有端口
+     *
+     * @param userId
+     * @return
+     */
+    public ApiResponse resetUserFlow(Integer userId) {
+        List<UserPortForward> forwardList = userPortForwardService.findUserForwardList(userId);
+        for (UserPortForward userPortForward : forwardList) {
+            Server server = serverDao.selectById(userPortForward.getServerId());
+            remoteForwardService.resetFlowCount(server, userPortForward.getRemoteIp(), userPortForward.getRemotePort());
+        }
+        forwardFlowService.deleteUserFlow(userId);
+        return ApiResponse.ok();
     }
 }

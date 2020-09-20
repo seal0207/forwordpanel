@@ -1,6 +1,8 @@
 package com.leeroy.forwordpanel.forwordpanel.job;
 
 import com.leeroy.forwordpanel.forwordpanel.model.User;
+import com.leeroy.forwordpanel.forwordpanel.service.ForwardFlowService;
+import com.leeroy.forwordpanel.forwordpanel.service.ForwardService;
 import com.leeroy.forwordpanel.forwordpanel.service.UserPortService;
 import com.leeroy.forwordpanel.forwordpanel.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class CheckExpireJob {
     @Autowired
     private UserPortService userPortService;
 
+    @Autowired
+    private ForwardFlowService forwardFlowService;
+
     @Scheduled(cron = "0 0/1 * * * ?")
     public void execute() {
         List<User> expireUserList = userService.findExpireUserList();
@@ -34,6 +39,18 @@ public class CheckExpireJob {
             }
             userPortService.disableUserPort(user.getId());
             userService.disableUserById(user.getId());
+        }
+        //流量用超的用户
+        List<User> enableUserList = userService.findEnableUserList();
+        for (User user : enableUserList) {
+            if ( user.getDataLimit() == null || user.getDataLimit() <= 0L) {
+                continue;
+            }
+            Long total = forwardFlowService.getUserFlowTotal(user.getId());
+            if (total >= user.getDataLimit() * 1024 * 1024 * 1024) {
+                userPortService.disableUserPort(user.getId());
+                userService.disableUserById(user.getId());
+            }
         }
     }
 }

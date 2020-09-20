@@ -56,8 +56,8 @@ public class ForwardService {
      * @param remotePort
      */
     public void resetFlowCount(String remoteHost, Integer remotePort){
-        ShellUtil.execShell(String.format("iptables -Z FORWARD -p tcp --dport %s -d %s",  remotePort, remoteHost));
-        ShellUtil.execShell(String.format("iptables -Z FORWARD -p udp --dport %s -d %s",  remotePort, remoteHost));
+        ShellUtil.execShell(String.format("iptables -D FORWARD -s %s",   remoteHost));
+        ShellUtil.execShell(String.format("iptables -I FORWARD -s %s", remoteHost));
     }
 
     /**

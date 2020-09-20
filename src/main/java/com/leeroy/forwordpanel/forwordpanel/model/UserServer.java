@@ -4,9 +4,14 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
 @Data
 public class UserServer {
 
+    @Id
     @TableId(value = "id",type = IdType.AUTO)
     private Integer id;
     /**

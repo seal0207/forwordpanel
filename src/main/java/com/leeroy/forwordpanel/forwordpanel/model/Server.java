@@ -6,13 +6,18 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Date;
 
 /**
  * 端口信息
  */
+@Entity
 @Data
 public class Server {
+
+    @Id
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
@@ -55,7 +60,7 @@ public class Server {
     /**
      * 服务器状态
      */
-    private String state;
+    private Integer state;
 
     private Date createTime;
 

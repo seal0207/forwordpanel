@@ -8,15 +8,21 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Date;
 
 
+@Table(name = "sys_user")
+@Entity
 @TableName("sys_user")
 @Data
 public class User {
     /**
      * ID
      */
+    @Id
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 

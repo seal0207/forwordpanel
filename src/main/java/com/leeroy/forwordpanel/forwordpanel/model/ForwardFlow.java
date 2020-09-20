@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Date;
 
 /**
@@ -12,8 +14,11 @@ import java.util.Date;
  * @author: liruifeng
  * @created: 2020/09/17 14:06
  */
+@Entity
 @Data
 public class ForwardFlow {
+
+    @Id
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     //中转记录id

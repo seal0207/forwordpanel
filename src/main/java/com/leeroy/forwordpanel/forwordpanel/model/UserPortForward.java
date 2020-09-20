@@ -6,14 +6,18 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Date;
 
 /**
  * 端口转发实体
  */
+@Entity
 @Data
 public class UserPortForward {
 
+    @Id
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     // 中转用户

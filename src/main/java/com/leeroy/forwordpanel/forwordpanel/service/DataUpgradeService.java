@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
 import com.leeroy.forwordpanel.forwordpanel.dao.*;
+import com.leeroy.forwordpanel.forwordpanel.jpa.*;
 import com.leeroy.forwordpanel.forwordpanel.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -51,6 +52,28 @@ public class DataUpgradeService {
 
     @Autowired
     private ForwardFlowDao forwardFlowDao;
+
+    @Autowired
+    private ServerRepository serverRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserPortRepository userPortRepository;
+
+    @Autowired
+    private UserServerRepository userServerRepository;
+
+    @Autowired
+    private UserPortForwardRepository userPortForwardRepository;
+
+    @Autowired
+    private ForwardFlowRepository forwardFlowRepository;
+
+    @Autowired
+    private PortRepository portRepository;
+
 
 
     /**
@@ -111,52 +134,60 @@ public class DataUpgradeService {
             JSONObject jsonObject = JSON.parseObject(json);
             //server
             JSONArray serverList = jsonObject.getJSONArray("serverList");
+            serverDao.delete(Wrappers.lambdaQuery());
             for (int i = 0; i < serverList.size(); i++) {
                 Server server = serverList.getObject(i, Server.class);
-                serverDao.insert(server);
+                serverRepository.save(server);
             }
             //user
             JSONArray userList = jsonObject.getJSONArray("userList");
+            userDao.delete(Wrappers.lambdaQuery());
             for (int i = 0; i < userList.size(); i++) {
                 User user = userList.getObject(i, User.class);
-                userDao.insert(user);
+                userRepository.save(user);
             }
             //user port
             JSONArray userPortList = jsonObject.getJSONArray("userPortList");
+            userPortDao.delete(Wrappers.lambdaQuery());
             for (int i = 0; i < userPortList.size(); i++) {
                 UserPort userPort = userPortList.getObject(i, UserPort.class);
-                userPortDao.insert(userPort);
+                userPortRepository.save(userPort);
             }
             //port
             JSONArray portList = jsonObject.getJSONArray("portList");
+            portDao.delete(Wrappers.lambdaQuery());
             for (int i = 0; i < portList.size(); i++) {
                 Port port = portList.getObject(i, Port.class);
-                portDao.insert(port);
+                portRepository.save(port);
             }
             //clash
             JSONArray clashList = jsonObject.getJSONArray("clashList");
+            clashDao.delete(Wrappers.lambdaQuery());
             for (int i = 0; i < clashList.size(); i++) {
                 Clash clash = clashList.getObject(i, Clash.class);
                 clashDao.insert(clash);
             }
             //forward
             JSONArray forwardList = jsonObject.getJSONArray("forwardList");
+            userPortForwardDao.delete(Wrappers.lambdaQuery());
             for (int i = 0; i < forwardList.size(); i++) {
-                UserPortForward userPortForward = clashList.getObject(i, UserPortForward.class);
-                userPortForwardDao.insert(userPortForward);
+                UserPortForward userPortForward = forwardList.getObject(i, UserPortForward.class);
+                userPortForwardRepository.save(userPortForward);
             }
             //user server
             JSONArray userServerList = jsonObject.getJSONArray("userServerList");
+            userServerDao.delete(Wrappers.lambdaQuery());
             for (int i = 0; i < userServerList.size(); i++) {
                 UserServer userServer = userServerList.getObject(i, UserServer.class);
-                userServerDao.insert(userServer);
+                userServerRepository.save(userServer);
             }
             try {
                 //forward flow
                 JSONArray forwardFlowList = jsonObject.getJSONArray("forwardFlowList");
+                forwardFlowDao.delete(Wrappers.lambdaQuery());
                 for (int i = 0; i < forwardFlowList.size(); i++) {
-                    ForwardFlow forwardFlow = clashList.getObject(i, ForwardFlow.class);
-                    forwardFlowDao.insert(forwardFlow);
+                    ForwardFlow forwardFlow = forwardFlowList.getObject(i, ForwardFlow.class);
+                    forwardFlowRepository.save(forwardFlow);
                 }
             } catch (Exception e) {
                 log.error("导入{}失败", "forward flow");

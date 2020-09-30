@@ -41,7 +41,6 @@ public class ConfigController {
         return ApiResponse.ok();
     }
 
-    //todo 删掉nologin
     @GetMapping("getNodeList")
     @ResponseBody
     public ApiResponse getNodeList(String id){

@@ -4,6 +4,8 @@ target/
 !**/src/main/**
 !**/src/test/**
 src/main/resources/static/.DS_Store
+forward_db.mv.db
+forward_db.mv.db.trace.db
 
 ### STS ###
 .apt_generated

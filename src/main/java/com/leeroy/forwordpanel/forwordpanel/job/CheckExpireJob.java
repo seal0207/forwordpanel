@@ -34,7 +34,7 @@ public class CheckExpireJob {
     public void execute() {
         List<User> expireUserList = userService.findExpireUserList();
         for (User user : expireUserList) {
-            if (user.getExpireTime() == null) {
+            if (user.getExpireTime() == null||user.getUserType()<=0) {
                 continue;
             }
             userPortService.disableUserPort(user.getId());
@@ -43,7 +43,7 @@ public class CheckExpireJob {
         //流量用超的用户
         List<User> enableUserList = userService.findEnableUserList();
         for (User user : enableUserList) {
-            if ( user.getDataLimit() == null || user.getDataLimit() <= 0L) {
+            if ( user.getDataLimit() == null || user.getDataLimit() <= 0L || user.getUserType()<=0) {
                 continue;
             }
             Long total = forwardFlowService.getUserFlowTotal(user.getId());

@@ -1,5 +1,7 @@
 package com.leeroy.forwordpanel.forwordpanel.service;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.pagehelper.Page;
@@ -15,9 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.yaml.snakeyaml.Yaml;
 
-import java.util.Date;
-import java.util.List;
+import java.io.StringWriter;
+import java.util.*;
 
 @Service
 public class ConfigService {
@@ -45,6 +48,51 @@ public class ConfigService {
         return ApiResponse.ok();
     }
 
+    public ApiResponse getNodeList(String id){
+        Clash clash = clashDao.selectById(id);
+        Yaml yaml = new Yaml();
+        JSONObject jsonObject = yaml.loadAs(clash.getText(), JSONObject.class);
+        JSONArray proxies = jsonObject.getJSONArray("proxies");
+        return ApiResponse.ok(proxies);
+    }
+
+    /**
+     * 保存节点列表
+     * @param nodeList
+     * @param id
+     * @return
+     */
+    public ApiResponse saveNodeList(JSONArray nodeList, String id){
+        Clash clash = clashDao.selectById(id);
+        Yaml yaml = new Yaml();
+        JSONObject jsonObject = yaml.loadAs(clash.getText(), JSONObject.class);
+        jsonObject.put("proxies", nodeList);
+        List<String> groupProxies = new ArrayList<>();
+        for (int i = 0; i < nodeList.size(); i++) {
+            JSONObject item = nodeList.getJSONObject(i);
+            groupProxies.add(item.getString("name"));
+        }
+        JSONArray proxyGroups = jsonObject.getJSONArray("proxy-groups");
+        for (int i = 0; i < proxyGroups.size(); i++) {
+            JSONObject item = proxyGroups.getJSONObject(i);
+            JSONArray proxies = item.getJSONArray("proxies");
+            Iterator iterator = proxies.iterator();
+            while (iterator.hasNext()) {
+                String name = (String) iterator.next();
+                if(name.indexOf("自动选择")>=0||name.indexOf("DIRECT")>=0){
+                    continue;
+                }
+                iterator.remove();
+            }
+            proxies.addAll(groupProxies);
+            item.put("proxies", proxies);
+        }
+        StringWriter writer = new StringWriter();
+        yaml.dump(jsonObject, writer);
+        clash.setText(writer.toString());
+        clashDao.updateById(clash);
+        return ApiResponse.ok();
+    }
 
     /**
      * 查询clash列表

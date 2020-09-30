@@ -1,5 +1,6 @@
 package com.leeroy.forwordpanel.forwordpanel.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.leeroy.forwordpanel.forwordpanel.common.annotation.NoLogin;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
 import com.leeroy.forwordpanel.forwordpanel.dto.PageRequest;
@@ -38,6 +39,19 @@ public class ConfigController {
     public ApiResponse delete(String id) {
         configService.delClash(id);
         return ApiResponse.ok();
+    }
+
+    //todo 删掉nologin
+    @GetMapping("getNodeList")
+    @ResponseBody
+    public ApiResponse getNodeList(String id){
+        return configService.getNodeList(id);
+    }
+
+    @PostMapping("saveNodeList")
+    @ResponseBody
+    public ApiResponse saveNodeList(@RequestBody JSONArray nodeList, @RequestParam String id){
+        return configService.saveNodeList(nodeList, id);
     }
 
 

@@ -79,7 +79,7 @@ public class ConfigService {
             Iterator iterator = proxies.iterator();
             while (iterator.hasNext()) {
                 String name = (String) iterator.next();
-                if(name.indexOf("自动选择")>=0||name.indexOf("DIRECT")>=0){
+                if(name.indexOf("自动选择")>=0||name.indexOf("DIRECT")>=0||item.getString("name").equals(name)){
                     continue;
                 }
                 iterator.remove();

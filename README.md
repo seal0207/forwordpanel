@@ -42,16 +42,6 @@
 可以用来托管一些配置
 
 ## 使用方式
-### 1. JAVA方式
-1. 本地安装jdk环境, maven
-2. 下载源码, 修改resources文件夹下的application.properties的spring.datasource.password为自己想要的密码
-2. 使用maven打包 mvn package
-3. 将target中打包好的jar(或者从release中下载) forwordpanel-0.0.1-SNAPSHOT.jar拷贝到要部署的服务器
-4. 服务器安装open-jdk
-5. 执行nohup java -jar forwordpanel-0.0.1-SNAPSHOT.jar&
-6. 初始化数据库, 访问ip:8080/h2 进入数据库管理, 用户名sa, 密码为上面修改的密码 将源码resources下的data.sql拷贝下来, 执行
-7. 访问ip:8080 登录吧, 默认登录账号为 admin XIAOLIzz123
-### 2. DOCKER方式
 #### 2.1 安装启动
 1. docker run -d -p 10203:8080 leeroydocker/forwordpanel:latest
 2. 访问ip:10203 登录吧, 默认登录账号为 admin XIAOLIzz123
@@ -59,13 +49,9 @@
 
 #### 2.2镜像升级
 1. docker pull leeroydocker/forwordpanel:latest
-2. 命令行输入docker ps 回车, 获取当前forwordpanel的实例id, 比如是aaa
-3. 从实例中拷贝出数据库文件 docker cp aaa:/forward_db.mv.db .
-4. 停止实例  docker stop aaa
-5. 使用新镜像启动实例  docker run -d -p 10203:8080 leeroydocker/forwordpanel:latest
-6. 命令行输入docker ps 回车, 获取当前forwordpanel的实例id, 比如是bbb
-7. 将之前的数据库拷贝进去  docker cp forward_db.mv.db bbb:/forward_db.mv.db
-8. 重启  docker restart bbb
+2. 登录面板, 系统设置--> 导出数据
+3. docker run -d -p 10203:8080 leeroydocker/forwordpanel:latest
+4. 登录(默认密码XIAOLIzz123), 导入刚才导出的数据
 
 ## 主要功能
 ### 1. 服务器管理

@@ -1,9 +1,7 @@
 # 闲(的)蛋(疼)中转面板
-演示地址: http://uovz.xiaolifly.xyz:10203/
+一个轻量的中转面板, 一台面板管理多台中转机器, 实现出租, 限流, 转发等功能
 
-用户名: admin
-
-密码: admin123
+介绍见wiki: https://github.com/xiaoli123/forwordpanel/wiki
 
 基于Java编写的中转管理平台(中转面板)
 使用的技术:

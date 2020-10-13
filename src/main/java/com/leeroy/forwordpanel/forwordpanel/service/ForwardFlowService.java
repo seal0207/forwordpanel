@@ -3,13 +3,19 @@ package com.leeroy.forwordpanel.forwordpanel.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.leeroy.forwordpanel.forwordpanel.dao.ForwardFlowDao;
+import com.leeroy.forwordpanel.forwordpanel.dao.PortDao;
+import com.leeroy.forwordpanel.forwordpanel.dao.ServerDao;
 import com.leeroy.forwordpanel.forwordpanel.dao.UserPortForwardDao;
+import com.leeroy.forwordpanel.forwordpanel.dto.ForwardFlowDTO;
 import com.leeroy.forwordpanel.forwordpanel.model.ForwardFlow;
+import com.leeroy.forwordpanel.forwordpanel.model.Port;
+import com.leeroy.forwordpanel.forwordpanel.model.Server;
 import com.leeroy.forwordpanel.forwordpanel.model.UserPortForward;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +38,12 @@ public class ForwardFlowService {
 
     @Autowired
     private UserPortForwardDao userPortForwardDao;
+
+    @Autowired
+    private ServerDao serverDao;
+
+    @Autowired
+    private PortDao portDao;
 
     /**
      * 保存中转记录
@@ -95,6 +107,29 @@ public class ForwardFlowService {
                 .eq(ForwardFlow::getUserId, userId);
         List<ForwardFlow> forwardFlows = forwardFlowDao.selectList(queryWrapper);
         return forwardFlows.stream().collect(Collectors.summingLong(ForwardFlow::getDataUsage));
+    }
+
+    /**
+     * 流量使用详情
+     * @param userId
+     * @return
+     */
+    public List<ForwardFlowDTO> getUserFlow(Integer userId) {
+        LambdaQueryWrapper<ForwardFlow> queryWrapper = Wrappers.<ForwardFlow>lambdaQuery()
+                .eq(ForwardFlow::getUserId, userId);
+        List<ForwardFlow> forwardFlows = forwardFlowDao.selectList(queryWrapper);
+        List<ForwardFlowDTO> forwardFlowDTOList = new ArrayList<>();
+        for (ForwardFlow forwardFlow : forwardFlows) {
+            ForwardFlowDTO forwardFlowDTO = new ForwardFlowDTO();
+            BeanUtils.copyProperties(forwardFlow, forwardFlowDTO);
+            Port port = portDao.selectById(forwardFlow.getPortId());
+            Server server = serverDao.selectById(forwardFlow.getServerId());
+            forwardFlowDTO.setServerName(server.getServerName());
+            forwardFlowDTO.setLocalPort(port.getLocalPort());
+            forwardFlowDTO.setInternetPort(port.getInternetPort());
+            forwardFlowDTOList.add(forwardFlowDTO);
+        }
+        return forwardFlowDTOList;
     }
 
 }

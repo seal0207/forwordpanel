@@ -3,11 +3,16 @@ package com.leeroy.forwordpanel.forwordpanel.common.util.remotessh;
 import com.jcraft.jsch.*;
 import com.leeroy.forwordpanel.forwordpanel.model.Server;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ClassPathUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ResourceUtils;
+import org.springframework.web.servlet.resource.PathResourceResolver;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -104,6 +109,25 @@ public class SSHCommandExecutor {
         }
         log.info("shell result: {}", StringUtils.join(stdout));
         return returnCode;
+    }
+
+    /**
+     * 执行脚本
+     * @param script
+     * @return
+     */
+    public void executeScript(final String script) {
+        try {
+            List<String> commandList = new ArrayList<>();
+            BufferedReader br = new BufferedReader(new FileReader(ResourceUtils.getFile("classpath:scripts/" + script)));
+            String str;
+            while ((str = br.readLine()) != null) {
+                commandList.add(str);
+            }
+            execute(commandList.toArray(new String[]{}));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public Vector<String> getResultSet() {

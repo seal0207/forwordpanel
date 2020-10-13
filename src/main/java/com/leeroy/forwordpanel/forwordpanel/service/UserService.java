@@ -12,7 +12,9 @@ import com.leeroy.forwordpanel.forwordpanel.common.response.PageDataResult;
 import com.leeroy.forwordpanel.forwordpanel.common.util.DigestUtils;
 import com.leeroy.forwordpanel.forwordpanel.dao.ServerDao;
 import com.leeroy.forwordpanel.forwordpanel.dao.UserDao;
+import com.leeroy.forwordpanel.forwordpanel.dto.ForwardFlowDTO;
 import com.leeroy.forwordpanel.forwordpanel.dto.UserSearchDTO;
+import com.leeroy.forwordpanel.forwordpanel.model.ForwardFlow;
 import com.leeroy.forwordpanel.forwordpanel.model.Server;
 import com.leeroy.forwordpanel.forwordpanel.model.User;
 import com.leeroy.forwordpanel.forwordpanel.model.UserPortForward;
@@ -55,7 +57,7 @@ public class UserService {
     @Autowired
     private UserPortForwardService userPortForwardService;
 
-    public PageInfo<User> getUserList(UserSearchDTO userSearch) {
+    public PageInfo<User> getUserPage(UserSearchDTO userSearch) {
         Integer userType = WebCurrentData.getUser().getUserType();
         if(userType>0){
             userSearch.setId(WebCurrentData.getUserId());
@@ -72,6 +74,41 @@ public class UserService {
         }
         return pageInfo;
     }
+
+    /**
+     * 获取用户详情
+     * @param userId
+     * @return
+     */
+    public User getUserDetail(Integer userId) {
+        Integer userType = WebCurrentData.getUser().getUserType();
+        userId=userId==null?WebCurrentData.getUserId():userId;
+        if (userType > 0) {
+            userId = WebCurrentData.getUserId();
+        }
+        User user = userDao.selectById(userId);
+        user.setDataUsage(forwardFlowService.getUserFlowTotal(user.getId()));
+        return user;
+    }
+
+    public List<User> getUserList(UserSearchDTO userSearch) {
+        Integer userType = WebCurrentData.getUser().getUserType();
+        if(userType>0){
+            userSearch.setId(WebCurrentData.getUserId());
+        }
+        List<User> baseAdminUsers = userDao.getUsers(userSearch);
+        return baseAdminUsers;
+    }
+
+    public List<ForwardFlowDTO> getForwardFlow(Integer userId){
+        Integer userType = WebCurrentData.getUser().getUserType();
+        userId=userId==null?WebCurrentData.getUserId():userId;
+        if (userType > 0) {
+            userId = WebCurrentData.getUserId();
+        }
+        return forwardFlowService.getUserFlow(userId);
+    }
+
 
 
     public ApiResponse addUser(User user) {

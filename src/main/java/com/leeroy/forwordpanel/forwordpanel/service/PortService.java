@@ -10,8 +10,10 @@ import com.leeroy.forwordpanel.forwordpanel.dao.PortDao;
 import com.leeroy.forwordpanel.forwordpanel.dao.ServerDao;
 import com.leeroy.forwordpanel.forwordpanel.dao.UserPortDao;
 import com.leeroy.forwordpanel.forwordpanel.dto.PageRequest;
+import com.leeroy.forwordpanel.forwordpanel.dto.PortAddDTO;
 import com.leeroy.forwordpanel.forwordpanel.dto.PortDTO;
 import com.leeroy.forwordpanel.forwordpanel.model.*;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,12 +48,128 @@ public class PortService {
             clash.setDeleted(false);
             portDao.insert(clash);
         } else {
+            LambdaQueryWrapper<Port> queryWrapper = Wrappers.<Port>lambdaQuery()
+                    .eq(Port::getDeleted, false)
+                    .eq(Port::getServerId, clash.getServerId())
+                    .eq(Port::getLocalPort, clash.getLocalPort()).ne(Port::getId, clash.getId());
+            List<Port> port = portDao.selectList(queryWrapper);
+            if (!CollectionUtils.isEmpty(port)) {
+                return ApiResponse.error("400", "本地端口已存在");
+            }
             Port existPort = portDao.selectById(clash.getId());
             BeanUtils.copyProperties(clash, existPort);
             existPort.setUpdateTime(new Date());
             portDao.updateById(existPort);
         }
         return ApiResponse.ok();
+    }
+
+    /**
+     * 保存clash
+     */
+    public ApiResponse save(PortAddDTO portAddDTO) {
+        String localPort = portAddDTO.getLocalPort();
+        String internetPort = portAddDTO.getInternetPort();
+        if(!checkPort(localPort)||(!StringUtils.isEmpty(internetPort)&&!checkPort(internetPort))){
+            return ApiResponse.error("400", "端口格式错误");
+        }
+        if(localPort.indexOf("-")>0&&(!StringUtils.isEmpty(internetPort)&&internetPort.indexOf("-")<=0)){
+            return ApiResponse.error("400", "端口格式错误");
+        }
+        if(localPort.indexOf("-")<=0&&(!StringUtils.isEmpty(internetPort)&&internetPort.indexOf("-")>0)){
+            return ApiResponse.error("400", "端口格式错误");
+        }
+        if(!StringUtils.isEmpty(internetPort)&&getRange(localPort)!=getRange(internetPort)){
+            return ApiResponse.error("400", "端口区间范围不匹配");
+        }
+        List<Integer> localPortList = getPortAddList(localPort);
+        List<Integer> internetPortList = getPortAddList(internetPort);
+        internetPortList = CollectionUtils.isEmpty(internetPortList)?localPortList:internetPortList;
+        for (int i = 0; i < localPortList.size(); i++) {
+            Integer addLocalPort = localPortList.get(i);
+            Integer addInternetPort = internetPortList.get(i);
+            LambdaQueryWrapper<Port> queryWrapper = Wrappers.<Port>lambdaQuery()
+                    .eq(Port::getDeleted, false)
+                    .eq(Port::getServerId, portAddDTO.getServerId())
+                    .eq(Port::getLocalPort, addLocalPort);
+            List<Port> port = portDao.selectList(queryWrapper);
+            if (!CollectionUtils.isEmpty(port)) {
+                continue;
+            }
+            Port addPort = new Port();
+            addPort.setServerId(portAddDTO.getServerId());
+            addPort.setLocalPort(addLocalPort);
+            addPort.setInternetPort(addInternetPort);
+            addPort.setDeleted(false);
+            addPort.setCreateTime(new Date());
+            portDao.insert(addPort);
+        }
+        return ApiResponse.ok();
+    }
+
+    /**
+     * 获取端口列表
+     * @param port
+     * @return
+     */
+    private List<Integer> getPortAddList(String port){
+        if(StringUtils.isEmpty(port)){
+            return new ArrayList<>();
+        }
+        String[] ports = port.split("-");
+        List<Integer> portList = new ArrayList<>();
+        if(ports.length==1) {
+            portList.add(Integer.valueOf(ports[0]));
+            return portList;
+        }
+        Integer startPort = Integer.valueOf(ports[0]);
+        Integer endPort = Integer.valueOf(ports[1]);
+        for (int i = startPort; i <= endPort ; i++) {
+            portList.add(i);
+        }
+        return portList;
+    }
+
+    /**
+     * 端口区间长度
+     * @param port
+     * @return
+     */
+    private int getRange(String port){
+        if(port.indexOf("-")>0){
+            String[] ports = port.split("-");
+            return Integer.valueOf(ports[1])-Integer.valueOf(ports[0]);
+        }else {
+            return 1;
+        }
+    }
+
+    /**
+     * 端口检查
+     * @param port
+     * @return
+     */
+    private boolean checkPort(String port) {
+        if (NumberUtils.isDigits(port)) {
+            return true;
+        }
+        if (port.indexOf("-") > 0) {
+            String[] ports = port.split("-");
+            if(ports.length>2){
+                return false;
+            }
+            for (String item : ports) {
+                if (!NumberUtils.isDigits(item)) {
+                    return false;
+                }
+            }
+            if(Integer.valueOf(ports[1])<Integer.valueOf(ports[0])){
+                return false;
+            }
+        }else{
+            return false;
+        }
+        return true;
     }
 
 
@@ -85,9 +203,19 @@ public class PortService {
      *
      * @return
      */
-    public List<PortDTO> findFreePortList() {
+    public List<Port> findListByServer(Integer serverId) {
+        LambdaQueryWrapper<Port> queryWrapper = Wrappers.<Port>lambdaQuery().eq(Port::getDeleted, false).eq(Port::getServerId, serverId);
+        return portDao.selectList(queryWrapper);
+    }
+
+    /**
+     * 查询clash列表
+     *
+     * @return
+     */
+    public List<PortDTO> findFreePortList(Integer serverId) {
         //todo serverId权限校验
-        LambdaQueryWrapper<Port> queryWrapper = Wrappers.<Port>lambdaQuery().eq(Port::getDeleted, false);
+        LambdaQueryWrapper<Port> queryWrapper = Wrappers.<Port>lambdaQuery().eq(Port::getDeleted, false).eq(Port::getServerId, serverId);
         List<Port> portList = portDao.selectList(queryWrapper);
         //查询出已经占用的端口
         LambdaQueryWrapper<UserPort> userPortQueryWrapper = Wrappers.<UserPort>lambdaQuery().eq(UserPort::getDeleted, false);

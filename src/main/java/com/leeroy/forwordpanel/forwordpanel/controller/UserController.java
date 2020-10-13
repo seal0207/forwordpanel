@@ -37,6 +37,7 @@ public class UserController {
 
     /**
      * 设置密码
+     *
      * @param pwd
      * @param isPwd
      * @return
@@ -76,6 +77,19 @@ public class UserController {
      */
     @RequestMapping(value = "/getPage", method = RequestMethod.POST)
     @ResponseBody
+    public ApiResponse getUserPage(@RequestBody UserSearchDTO userSearch) {
+        // 获取用户列表
+        return ApiResponse.ok(userService.getUserPage(userSearch));
+    }
+
+    /**
+     * 用户列表
+     *
+     * @param userSearch
+     * @return
+     */
+    @RequestMapping(value = "/getList", method = RequestMethod.POST)
+    @ResponseBody
     public ApiResponse getUserList(@RequestBody UserSearchDTO userSearch) {
         // 获取用户列表
         return ApiResponse.ok(userService.getUserList(userSearch));
@@ -109,10 +123,10 @@ public class UserController {
     @RequestMapping(value = "/disable", method = RequestMethod.GET)
     @ResponseBody
     public ApiResponse disable(@RequestParam("id") Integer id) {
-        if(WebCurrentData.getUser().getUserType()>0){
+        if (WebCurrentData.getUser().getUserType() > 0) {
             return ApiResponse.error("403", "您没有权限执行此操作");
         }
-         return userService.disableUser(id);
+        return userService.disableUser(id);
     }
 
     /**
@@ -124,7 +138,7 @@ public class UserController {
     @RequestMapping(value = "/enable", method = RequestMethod.GET)
     @ResponseBody
     public ApiResponse enable(@RequestParam("id") Integer id) {
-        if(WebCurrentData.getUser().getUserType()>0){
+        if (WebCurrentData.getUser().getUserType() > 0) {
             return ApiResponse.error("403", "您没有权限执行此操作");
         }
         return userService.enableUser(id);
@@ -140,11 +154,11 @@ public class UserController {
     @GetMapping(value = "/delete")
     @ResponseBody
     public ApiResponse delete(@RequestParam("id") Integer id) {
-        if(WebCurrentData.getUser().getUserType()>0){
+        if (WebCurrentData.getUser().getUserType() > 0) {
             return ApiResponse.error("403", "您没有权限执行此操作");
         }
         List<UserPortDTO> userPortList = userPortService.findUserPortList(id);
-        if(!CollectionUtils.isEmpty(userPortList)){
+        if (!CollectionUtils.isEmpty(userPortList)) {
             return ApiResponse.error("401", "请先删除用户端口");
         }
         return userService.delUser(id);
@@ -163,5 +177,29 @@ public class UserController {
             return ApiResponse.error("403", "您没有权限执行此操作");
         }
         return userService.resetUserFlow(id);
+    }
+
+    /**
+     * 获取用户流量信息
+     *
+     * @param userId
+     * @return
+     */
+    @GetMapping(value = "/getUserDetail")
+    @ResponseBody
+    public ApiResponse getUserDetail(@RequestParam(value = "userId", required = false) Integer userId) {
+        return ApiResponse.ok(userService.getUserDetail(userId));
+    }
+
+    /**
+     * 获取用户详细流量信息
+     *
+     * @param userId
+     * @return
+     */
+    @GetMapping(value = "/getForwardFlow")
+    @ResponseBody
+    public ApiResponse getForwardFlow(@RequestParam(value = "userId", required = false) Integer userId) {
+        return ApiResponse.ok(userService.getForwardFlow(userId));
     }
 }

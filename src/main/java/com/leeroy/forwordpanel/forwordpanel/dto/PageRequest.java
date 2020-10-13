@@ -15,8 +15,8 @@ public class PageRequest {
     /** 默认页码 */
     public static Integer		DEFAULT_PAGE_NUM  = 1;
 
-    private Integer pageNum;
-    private Integer pageSize;
+    protected Integer pageNum;
+    protected Integer pageSize;
 
 
     public Integer getPageNum() {

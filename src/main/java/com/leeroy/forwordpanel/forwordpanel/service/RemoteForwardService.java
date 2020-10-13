@@ -52,6 +52,7 @@ public class RemoteForwardService {
             sshExecutor.execute((String.format("ip -o -4 addr list | grep -Ev '\\s(docker|lo)' | awk '{print $4}' | cut -d/ -f1|head -n 1", localPort, remoteHost, remotePort)));
             localIp = sshExecutor.getResult();
         }
+        sshExecutor.executeScript("turnOnNat.sh");
         sshExecutor.execute((String.format("iptables -t nat -A PREROUTING -p tcp --dport %d -j DNAT --to-destination %s:%d", localPort, remoteHost, remotePort)));
         sshExecutor.execute((String.format("iptables -t nat -A PREROUTING -p udp --dport %d -j DNAT --to-destination %s:%d", localPort, remoteHost, remotePort)));
         sshExecutor.execute((String.format("iptables -t nat -A POSTROUTING -p tcp -d %s --dport %d -j SNAT --to-source %s", remoteHost, remotePort, localIp)));

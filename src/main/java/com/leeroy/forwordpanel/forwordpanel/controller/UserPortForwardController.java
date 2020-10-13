@@ -3,6 +3,7 @@ package com.leeroy.forwordpanel.forwordpanel.controller;
 import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
 import com.leeroy.forwordpanel.forwordpanel.dto.PageRequest;
+import com.leeroy.forwordpanel.forwordpanel.dto.UserPortForwardPageReq;
 import com.leeroy.forwordpanel.forwordpanel.model.User;
 import com.leeroy.forwordpanel.forwordpanel.model.UserPortForward;
 import com.leeroy.forwordpanel.forwordpanel.service.UserPortForwardService;
@@ -28,7 +29,7 @@ public class UserPortForwardController {
      */
     @ResponseBody
     @PostMapping("getPage")
-    public ApiResponse getList(@RequestBody PageRequest pageRequest) {
+    public ApiResponse getList(@RequestBody UserPortForwardPageReq pageRequest) {
         return forwardService.getUserForwardList(pageRequest);
     }
 

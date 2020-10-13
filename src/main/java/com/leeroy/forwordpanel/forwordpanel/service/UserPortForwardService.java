@@ -13,6 +13,7 @@ import com.leeroy.forwordpanel.forwordpanel.common.util.BeanCopyUtil;
 import com.leeroy.forwordpanel.forwordpanel.dao.*;
 import com.leeroy.forwordpanel.forwordpanel.dto.PageRequest;
 import com.leeroy.forwordpanel.forwordpanel.dto.UserPortForwardDTO;
+import com.leeroy.forwordpanel.forwordpanel.dto.UserPortForwardPageReq;
 import com.leeroy.forwordpanel.forwordpanel.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,24 +62,21 @@ public class UserPortForwardService {
      *
      * @return
      */
-    public ApiResponse getUserForwardList(PageRequest pageRequest) {
+    public ApiResponse getUserForwardList(UserPortForwardPageReq pageRequest) {
         Integer userId = WebCurrentData.getUserId();
         LambdaQueryWrapper<UserPortForward> queryWrapper;
         if (WebCurrentData.getUser().getUserType() == 0) {
             queryWrapper = Wrappers.<UserPortForward>lambdaQuery()
-                    .eq(UserPortForward::getDeleted, false);
+                    .eq(UserPortForward::getDeleted, false)
+            .eq(UserPortForward::getUserId, pageRequest.getUserId()==null?userId:pageRequest.getUserId());
         } else {
             queryWrapper = Wrappers.<UserPortForward>lambdaQuery().eq(UserPortForward::getUserId, userId)
                     .eq(UserPortForward::getDeleted, false);
         }
         Page page = PageHelper.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
-        PageInfo pageInfo = page.toPageInfo();
         List<UserPortForward> userPortForwardList = userPortForwardDao.selectList(queryWrapper);
         List<UserPortForwardDTO> userPortForwardDTOList = BeanCopyUtil.copyListProperties(userPortForwardList, UserPortForwardDTO::new);
-        Map<Integer, String> portFlowMap = getPortFlowMap(userPortForwardList);
         for (UserPortForwardDTO userPortForward : userPortForwardDTOList) {
-            String flow = portFlowMap.get(userPortForward.getId());
-            userPortForward.setDataUsage(Long.valueOf(flow == null ? "0" : flow));
             Port port = portDao.selectById(userPortForward.getPortId());
             if (port != null) {
                 userPortForward.setLocalPort(port.getLocalPort());
@@ -94,6 +92,7 @@ public class UserPortForwardService {
             }
             userPortForward.setInternetPort(port.getInternetPort());
         }
+        PageInfo pageInfo = page.toPageInfo();
         pageInfo.setList(userPortForwardDTOList);
         return ApiResponse.ok(pageInfo);
     }

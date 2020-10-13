@@ -16,11 +16,14 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 @Service
 public class ConfigService {
@@ -64,8 +67,15 @@ public class ConfigService {
      */
     public ApiResponse saveNodeList(JSONArray nodeList, String id){
         Clash clash = clashDao.selectById(id);
-        Yaml yaml = new Yaml();
+        DumperOptions dumperOptions = new DumperOptions();
+
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        dumperOptions.setIndicatorIndent(2);
+        dumperOptions.setIndent(2);
+        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
+        Yaml yaml = new Yaml(dumperOptions);
         JSONObject jsonObject = yaml.loadAs(clash.getText(), JSONObject.class);
+        parseProxies(nodeList);
         jsonObject.put("proxies", nodeList);
         List<String> groupProxies = new ArrayList<>();
         for (int i = 0; i < nodeList.size(); i++) {
@@ -79,9 +89,14 @@ public class ConfigService {
             Iterator iterator = proxies.iterator();
             while (iterator.hasNext()) {
                 String name = (String) iterator.next();
-                if(name.indexOf("自动选择")>=0||name.indexOf("DIRECT")>=0||item.getString("name").equals(name)){
+                if(name.indexOf("DIRECT")>=0){
                     continue;
                 }
+                //排除分组j
+               if (isGroup(proxyGroups, name)){
+                   continue;
+               }
+
                 iterator.remove();
             }
             proxies.addAll(groupProxies);
@@ -92,6 +107,29 @@ public class ConfigService {
         clash.setText(writer.toString());
         clashDao.updateById(clash);
         return ApiResponse.ok();
+    }
+
+    private void parseProxies(JSONArray nodeList){
+        for (int i = 0; i < nodeList.size(); i++) {
+            JSONObject item = nodeList.getJSONObject(i);
+            item.put("name", item.getString("name"));
+            item.put("server", item.getString("server"));
+            item.put("port", item.getInteger("port"));
+            item.put("password", item.getString("password"));
+            item.put("sni", item.getString("sni"));
+            item.put("type", item.getString("type"));
+        }
+    }
+
+    private boolean isGroup(JSONArray proxyGroups, String name){
+        //排除分组j
+        for (int j = 0; j < proxyGroups.size(); j++) {
+            JSONObject proxy = proxyGroups.getJSONObject(j);
+            if( proxy.getString("name").equals(name)){
+               return true;
+            }
+        }
+        return false;
     }
 
     /**

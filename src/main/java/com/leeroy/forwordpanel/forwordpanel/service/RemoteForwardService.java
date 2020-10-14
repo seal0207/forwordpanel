@@ -122,7 +122,18 @@ public class RemoteForwardService {
     public void resetFlowCount(Server server, String remoteHost, Integer remotePort) {
         SSHCommandExecutor sshExecutor = getSshExecutor(server);
         sshExecutor.execute(String.format("iptables -D FORWARD -s %s", remoteHost), String.format("iptables -I FORWARD -s %s", remoteHost));
-        }
+    }
+
+    /**
+     * 获取上次重启时间
+      * @param server
+     * @return
+     */
+    public String getLastRestart(Server server){
+        SSHCommandExecutor sshExecutor = getSshExecutor(server);
+        sshExecutor.execute("who -b");
+        return sshExecutor.getResult();
+    }
 
     /**
      * 重置流量

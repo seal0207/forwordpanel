@@ -73,6 +73,10 @@ public class DataUpgradeService {
 
     @Autowired
     private PortRepository portRepository;
+    @Autowired
+    private SysConfigDao sysConfigDao;
+    @Autowired
+    private SysConfigRepository sysConfigRepository;
 
 
 
@@ -103,6 +107,8 @@ public class DataUpgradeService {
         //forward list
         List<UserPortForward> forwardList = userPortForwardDao.selectList(Wrappers.lambdaQuery());
         exportMap.put("forwardList", forwardList);
+        List<SysConfig> sysConfigList = sysConfigDao.selectList(Wrappers.lambdaQuery());
+        exportMap.put("sysConfigList", sysConfigList);
         try {
             //forward flow list
             List<ForwardFlow> forwardFlowList = forwardFlowDao.selectList(Wrappers.lambdaQuery());
@@ -145,6 +151,12 @@ public class DataUpgradeService {
             for (int i = 0; i < userList.size(); i++) {
                 User user = userList.getObject(i, User.class);
                 userRepository.save(user);
+            }
+            JSONArray sysConfigList = jsonObject.getJSONArray("sysConfigList");
+            sysConfigDao.delete(Wrappers.lambdaQuery());
+            for (int i = 0; i < sysConfigList.size(); i++) {
+                SysConfig sysConfig = sysConfigList.getObject(i, SysConfig.class);
+                sysConfigRepository.save(sysConfig);
             }
             //user port
             JSONArray userPortList = jsonObject.getJSONArray("userPortList");

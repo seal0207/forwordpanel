@@ -144,6 +144,16 @@ public class UserController {
         return userService.enableUser(id);
     }
 
+    /**
+     * 获取用户信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/getCurrentUser", method = RequestMethod.GET)
+    @ResponseBody
+    public ApiResponse getCurrentUser() {
+        return ApiResponse.ok(userService.getCurrentUser());
+    }
 
     /**
      * 启用用户

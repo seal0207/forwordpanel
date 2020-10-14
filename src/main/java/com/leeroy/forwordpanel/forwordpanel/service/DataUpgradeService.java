@@ -3,6 +3,7 @@ package com.leeroy.forwordpanel.forwordpanel.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
@@ -153,10 +154,12 @@ public class DataUpgradeService {
                 userRepository.save(user);
             }
             JSONArray sysConfigList = jsonObject.getJSONArray("sysConfigList");
-            sysConfigDao.delete(Wrappers.lambdaQuery());
-            for (int i = 0; i < sysConfigList.size(); i++) {
-                SysConfig sysConfig = sysConfigList.getObject(i, SysConfig.class);
-                sysConfigRepository.save(sysConfig);
+            if(CollectionUtils.isNotEmpty(sysConfigList)){
+                sysConfigDao.delete(Wrappers.lambdaQuery());
+                for (int i = 0; i < sysConfigList.size(); i++) {
+                    SysConfig sysConfig = sysConfigList.getObject(i, SysConfig.class);
+                    sysConfigRepository.save(sysConfig);
+                }
             }
             //user port
             JSONArray userPortList = jsonObject.getJSONArray("userPortList");

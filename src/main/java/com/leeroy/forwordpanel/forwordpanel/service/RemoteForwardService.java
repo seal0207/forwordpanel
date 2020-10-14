@@ -132,6 +132,7 @@ public class RemoteForwardService {
     public String getLastRestart(Server server){
         SSHCommandExecutor sshExecutor = getSshExecutor(server);
         sshExecutor.execute("who -b");
+        sshExecutor.executeScript("turnOnNat.sh");
         return sshExecutor.getResult();
     }
 

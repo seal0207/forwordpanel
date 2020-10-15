@@ -35,9 +35,6 @@ public class LoginService {
         if (baseAdminUser == null) {
             return ApiResponse.error("403", "用户名密码错误");
         }
-        if(baseAdminUser.getDisabled()){
-            return ApiResponse.error("403", "账号已被禁用");
-        }
         if (!DigestUtils.Md5(loginDTO.getUsername(), loginDTO.getPassword()).equals(baseAdminUser.getPassword())) {
             return ApiResponse.error("403", "用户名密码错误");
         }

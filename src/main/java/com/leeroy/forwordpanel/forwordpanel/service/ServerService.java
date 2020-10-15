@@ -6,6 +6,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
+import com.leeroy.forwordpanel.forwordpanel.common.enums.ServerStatusEnum;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
 import com.leeroy.forwordpanel.forwordpanel.common.response.PageDataResult;
 import com.leeroy.forwordpanel.forwordpanel.dao.ServerDao;
@@ -27,6 +28,8 @@ import org.springframework.util.StringUtils;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,6 +44,10 @@ public class ServerService {
     @Autowired
     private UserPortDao userPortDao;
 
+    @Autowired
+    private RemoteForwardService remoteForwardService;
+
+    private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
     /**
      * 保存clash
@@ -51,19 +58,43 @@ public class ServerService {
             server.setDeleted(false);
             server.setKey(UUID.randomUUID().toString());
             server.setOwnerId(WebCurrentData.getUserId());
+            server.setState(ServerStatusEnum.INIT.getCode());
             serverDao.insert(server);
             UserServer userServer = new UserServer();
             userServer.setUserId(WebCurrentData.getUserId());
             userServer.setServerId(server.getId());
             userServer.setDeleted(false);
             userServerDao.insert(userServer);
+            testConnect(server);
         } else {
             Server existPort = serverDao.selectById(server.getId());
             BeanUtils.copyProperties(server, existPort);
             existPort.setUpdateTime(new Date());
+            existPort.setState(ServerStatusEnum.INIT.getCode());
             serverDao.updateById(existPort);
+            testConnect(existPort);
+
         }
         return ApiResponse.ok();
+    }
+
+    /**
+     * 尝试连接
+     * @param server
+     */
+    public void testConnect(Server server){
+        executorService.execute(() -> {
+            remoteForwardService.checkIPV4Forward(server);
+            String response = remoteForwardService.getLastRestart(server);
+            if(StringUtils.isEmpty(response)){
+                server.setState(ServerStatusEnum.CONNECT_FAIL.getCode());
+            }else {
+                server.setLastRebootTime(response);
+                server.setState(ServerStatusEnum.ONLINE.getCode());
+            }
+            serverDao.updateById(server);
+        });
+
     }
 
     public PageInfo<Server> getServerPage(PageRequest pageRequest) {
@@ -118,6 +149,26 @@ public class ServerService {
         return serverList;
     }
 
+    /**
+     * 查询clash列表
+     *
+     * @return
+     */
+    public List<Server> findListWithoutLogin() {
+        LambdaQueryWrapper<Server> queryWrapper = Wrappers.<Server>lambdaQuery().eq(Server::getDeleted, false);
+        List<Server> serverList = serverDao.selectList(queryWrapper);
+        LambdaQueryWrapper<UserServer> userServerQueryWrapper = Wrappers.<UserServer>lambdaQuery().eq(UserServer::getDeleted, false);
+        List<UserServer> userServerList = userServerDao.selectList(userServerQueryWrapper);
+        serverList = serverList.stream().filter(server -> {
+            for (UserServer userServer : userServerList) {
+                if (server.getId().equals(userServer.getServerId())) {
+                    return true;
+                }
+            }
+            return false;
+        }).collect(Collectors.toList());
+        return serverList;
+    }
 
     /**
      * 删除clash

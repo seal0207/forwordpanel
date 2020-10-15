@@ -13,12 +13,14 @@ import com.leeroy.forwordpanel.forwordpanel.common.util.DigestUtils;
 import com.leeroy.forwordpanel.forwordpanel.dao.ServerDao;
 import com.leeroy.forwordpanel.forwordpanel.dao.UserDao;
 import com.leeroy.forwordpanel.forwordpanel.dto.ForwardFlowDTO;
+import com.leeroy.forwordpanel.forwordpanel.dto.UserDTO;
 import com.leeroy.forwordpanel.forwordpanel.dto.UserSearchDTO;
 import com.leeroy.forwordpanel.forwordpanel.model.ForwardFlow;
 import com.leeroy.forwordpanel.forwordpanel.model.Server;
 import com.leeroy.forwordpanel.forwordpanel.model.User;
 import com.leeroy.forwordpanel.forwordpanel.model.UserPortForward;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -109,6 +111,16 @@ public class UserService {
         return forwardFlowService.getUserFlow(userId);
     }
 
+    public UserDTO getCurrentUser() {
+        Integer userId = WebCurrentData.getUserId();
+        if (userId == null) {
+            return null;
+        }
+        User user = userDao.selectById(userId);
+        UserDTO result = new UserDTO();
+        BeanUtils.copyProperties(user, result);
+        return result;
+    }
 
 
     public ApiResponse addUser(User user) {

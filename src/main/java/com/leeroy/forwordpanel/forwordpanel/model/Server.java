@@ -67,4 +67,8 @@ public class Server {
     private Date updateTime;
 
     private Boolean deleted;
+    /**
+     * 最后一次重启时间
+     */
+    private String lastRebootTime;
 }

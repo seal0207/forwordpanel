@@ -12,6 +12,7 @@ import com.leeroy.forwordpanel.forwordpanel.dao.UserPortDao;
 import com.leeroy.forwordpanel.forwordpanel.dto.PageRequest;
 import com.leeroy.forwordpanel.forwordpanel.dto.PortAddDTO;
 import com.leeroy.forwordpanel.forwordpanel.dto.PortDTO;
+import com.leeroy.forwordpanel.forwordpanel.dto.PortPageRequest;
 import com.leeroy.forwordpanel.forwordpanel.model.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.BeanUtils;
@@ -179,7 +180,7 @@ public class PortService {
      * @return
      */
     public PageInfo findList(PageRequest pageRequest) {
-        LambdaQueryWrapper<Port> queryWrapper = Wrappers.<Port>lambdaQuery().eq(Port::getDeleted, false);
+        LambdaQueryWrapper<Port> queryWrapper = Wrappers.<Port>lambdaQuery().eq(Port::getDeleted, false).orderByDesc(Port::getCreateTime);
         Page page = PageHelper.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
         List<Port> portList = portDao.selectList(queryWrapper);
         List<PortDTO> portDTOList = new ArrayList<>();
@@ -203,9 +204,13 @@ public class PortService {
      *
      * @return
      */
-    public List<Port> findListByServer(Integer serverId) {
-        LambdaQueryWrapper<Port> queryWrapper = Wrappers.<Port>lambdaQuery().eq(Port::getDeleted, false).eq(Port::getServerId, serverId);
-        return portDao.selectList(queryWrapper);
+    public PageInfo<Port> findListByServer(PortPageRequest pageRequest) {
+        LambdaQueryWrapper<Port> queryWrapper = Wrappers.<Port>lambdaQuery().eq(Port::getDeleted, false).eq(Port::getServerId, pageRequest.getServerId()).orderByDesc(Port::getCreateTime);
+        Page<Port> page = PageHelper.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+        List<Port> portList = portDao.selectList(queryWrapper);
+        PageInfo<Port> pageInfo = page.toPageInfo();
+        pageInfo.setList(portList);
+        return pageInfo;
     }
 
     /**
@@ -214,23 +219,10 @@ public class PortService {
      * @return
      */
     public List<PortDTO> findFreePortList(Integer serverId) {
-        //todo serverId权限校验
-        LambdaQueryWrapper<Port> queryWrapper = Wrappers.<Port>lambdaQuery().eq(Port::getDeleted, false).eq(Port::getServerId, serverId);
-        List<Port> portList = portDao.selectList(queryWrapper);
-        //查询出已经占用的端口
-        LambdaQueryWrapper<UserPort> userPortQueryWrapper = Wrappers.<UserPort>lambdaQuery().eq(UserPort::getDeleted, false);
-        List<UserPort> userPortList = userPortDao.selectList(userPortQueryWrapper);
-        //过滤掉已经分配的端口
-        List<Port> result = portList.stream().filter(port -> {
-            for (UserPort userPort : userPortList) {
-                if (userPort.getPortId().equals(port.getId())) {
-                    return false;
-                }
-            }
-            return true;
-        }).collect(Collectors.toList());
+        //todo serverId权限校验;
+        List<Port> portList = portDao.selectServerFreePort(serverId);
         List<PortDTO> portDTOList = new ArrayList<>();
-        for (Port port : result) {
+        for (Port port : portList) {
             PortDTO portDTO = new PortDTO();
             BeanUtils.copyProperties(port, portDTO);
             Server server = serverDao.selectById(port.getServerId());
@@ -238,6 +230,23 @@ public class PortService {
             portDTOList.add(portDTO);
         }
         return portDTOList;
+    }
+
+
+    public PageInfo<PortDTO> findFreePortPage(PortPageRequest pageRequest) {
+        Page<PortDTO> page = PageHelper.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
+        List<Port> portList = portDao.selectServerFreePort(pageRequest.getServerId());
+        List<PortDTO> portDTOList = new ArrayList<>();
+        for (Port port : portList) {
+            PortDTO portDTO = new PortDTO();
+            BeanUtils.copyProperties(port, portDTO);
+            Server server = serverDao.selectById(port.getServerId());
+            portDTO.setServerName(server.getServerName());
+            portDTOList.add(portDTO);
+        }
+        PageInfo<PortDTO> pageInfo = page.toPageInfo();
+        pageInfo.setList(portDTOList);
+        return pageInfo;
     }
 
     /**

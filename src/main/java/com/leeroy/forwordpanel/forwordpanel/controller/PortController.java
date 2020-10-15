@@ -4,6 +4,7 @@ import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
 import com.leeroy.forwordpanel.forwordpanel.dto.PageRequest;
 import com.leeroy.forwordpanel.forwordpanel.dto.PortAddDTO;
+import com.leeroy.forwordpanel.forwordpanel.dto.PortPageRequest;
 import com.leeroy.forwordpanel.forwordpanel.model.Port;
 import com.leeroy.forwordpanel.forwordpanel.service.PortService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +19,9 @@ public class PortController {
     private PortService portService;
 
     @ResponseBody
-    @GetMapping("getPortList")
-    public ApiResponse getPortList(Integer serverId) {
-        return ApiResponse.ok(portService.findListByServer(serverId));
+    @PostMapping("getPortList")
+    public ApiResponse getPortList(@RequestBody PortPageRequest pageRequest) {
+        return ApiResponse.ok(portService.findListByServer(pageRequest));
     }
 
     @ResponseBody
@@ -33,6 +34,12 @@ public class PortController {
     @GetMapping("getFreePortList")
     public ApiResponse getFreePortList(Integer serverId) {
         return ApiResponse.ok(portService.findFreePortList(serverId));
+    }
+
+    @ResponseBody
+    @GetMapping("getFreePortPage")
+    public ApiResponse getFreePortPage(PortPageRequest portPageRequest) {
+        return ApiResponse.ok(portService.findFreePortPage(portPageRequest));
     }
 
 

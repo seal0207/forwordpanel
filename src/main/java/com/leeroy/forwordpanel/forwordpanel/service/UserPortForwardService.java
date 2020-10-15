@@ -110,6 +110,19 @@ public class UserPortForwardService {
         return userPortForwardDao.selectList(queryWrapper);
     }
 
+    /**
+     * 获取服务器启动的中转
+     * @param serverId
+     * @return
+     */
+    public List<UserPortForward> findServerEnabledForwardList(Integer serverId) {
+        LambdaQueryWrapper<UserPortForward> queryWrapper;
+        queryWrapper = Wrappers.<UserPortForward>lambdaQuery().eq(UserPortForward::getServerId, serverId)
+                .eq(UserPortForward::getDeleted, false)
+                .eq(UserPortForward::getDisabled, false);
+        return userPortForwardDao.selectList(queryWrapper);
+    }
+
 
     /**
      * 获取流量
@@ -185,7 +198,7 @@ public class UserPortForwardService {
      * @param userPortForward
      * @return
      */
-    public ApiResponse startForward(UserPortForward userPortForward) {
+    public ApiResponse startForward(UserPortForward userPortForward, boolean needLogin) {
         ApiResponse apiResponse = permissionCheck(userPortForward.getUserId());
         if (!apiResponse.getSuccess()) {
             return apiResponse;
@@ -206,7 +219,7 @@ public class UserPortForwardService {
                     break;
                 }
             }
-        if (user.getUserType() > 0) {
+        if (needLogin&&user.getUserType() > 0) {
             if (!hasPort) {
                 return ApiResponse.error("403", "用户没有此端口的权限");
             }

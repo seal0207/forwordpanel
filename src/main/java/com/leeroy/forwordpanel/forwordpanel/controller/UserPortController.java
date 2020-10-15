@@ -5,6 +5,7 @@ import com.leeroy.forwordpanel.forwordpanel.common.WebCurrentData;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ApiResponse;
 import com.leeroy.forwordpanel.forwordpanel.common.response.PageDataResult;
 import com.leeroy.forwordpanel.forwordpanel.common.response.ResponseResult;
+import com.leeroy.forwordpanel.forwordpanel.dto.UserPortPageRequest;
 import com.leeroy.forwordpanel.forwordpanel.model.UserPort;
 import com.leeroy.forwordpanel.forwordpanel.service.UserPortService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,9 @@ public class UserPortController {
     @Autowired
     private UserPortService userPortService;
 
-    @GetMapping("getList")
-    public ApiResponse getUserPortList(Integer userId) {
-        return ApiResponse.ok(userPortService.findUserPortList(userId));
+    @PostMapping("getList")
+    public ApiResponse getUserPortList(@RequestBody UserPortPageRequest pageRequest) {
+        return ApiResponse.ok(userPortService.findUserPortList(pageRequest));
     }
 
     @PostMapping("save")

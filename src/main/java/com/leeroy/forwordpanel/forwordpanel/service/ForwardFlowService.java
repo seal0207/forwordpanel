@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -82,7 +83,8 @@ public class ForwardFlowService {
             BeanUtils.copyProperties(forward, forwardFlow);
             forwardFlow.setId(null);
             forwardFlow.setForwardId(forward.getId());
-            forwardFlow.setDataUsage(Long.valueOf(forwardDTOStringEntry.getValue()));
+            String dataUsage = forwardDTOStringEntry.getValue() == null ? "0" : forwardDTOStringEntry.getValue();
+            forwardFlow.setDataUsage(Long.valueOf(dataUsage));
             saveFlow(forwardFlow);
         }
     }
@@ -129,6 +131,7 @@ public class ForwardFlowService {
             forwardFlowDTO.setInternetPort(port.getInternetPort());
             forwardFlowDTOList.add(forwardFlowDTO);
         }
+        forwardFlowDTOList = forwardFlowDTOList.stream().filter(forwardFlowDTO -> forwardFlowDTO.getDataUsage()!=null&&forwardFlowDTO.getDataUsage()>0).collect(Collectors.toList());
         return forwardFlowDTOList;
     }
 

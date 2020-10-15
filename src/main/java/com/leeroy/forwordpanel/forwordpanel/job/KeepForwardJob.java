@@ -41,6 +41,7 @@ public class KeepForwardJob {
     public void execute() {
         List<Server> serviceList = serverService.findListWithoutLogin();
         for (Server server : serviceList) {
+            remoteForwardService.checkIPV4Forward(server);
             String lastRestart = remoteForwardService.getLastRestart(server);
             if(StringUtils.isEmpty(lastRestart)){
                 server.setState(ServerStatusEnum.CONNECT_FAIL.getCode());

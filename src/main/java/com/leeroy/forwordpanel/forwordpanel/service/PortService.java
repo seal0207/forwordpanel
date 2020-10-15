@@ -80,9 +80,6 @@ public class PortService {
         if(localPort.indexOf("-")<=0&&(!StringUtils.isEmpty(internetPort)&&internetPort.indexOf("-")>0)){
             return ApiResponse.error("400", "端口格式错误");
         }
-        if(getRange(localPort)>20){
-            return ApiResponse.error("400", "端口一次最多新增20个");
-        }
         if(!StringUtils.isEmpty(internetPort)&&getRange(localPort)!=getRange(internetPort)){
             return ApiResponse.error("400", "端口区间范围不匹配");
         }

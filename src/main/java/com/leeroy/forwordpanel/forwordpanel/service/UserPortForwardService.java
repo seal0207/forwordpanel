@@ -1,6 +1,7 @@
 package com.leeroy.forwordpanel.forwordpanel.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.pagehelper.Page;
@@ -68,10 +69,17 @@ public class UserPortForwardService {
         if (WebCurrentData.getUser().getUserType() == 0) {
             queryWrapper = Wrappers.<UserPortForward>lambdaQuery()
                     .eq(UserPortForward::getDeleted, false)
-            .eq(UserPortForward::getUserId, pageRequest.getUserId()==null?userId:pageRequest.getUserId());
+            .eq(UserPortForward::getUserId, pageRequest.getUserId()==null?userId:pageRequest.getUserId())
+                    .orderByDesc(UserPortForward::getRemoteHost)
+                    .orderByAsc(UserPortForward::getDisabled)
+                    .orderByDesc(UserPortForward::getCreateTime)
+            ;
         } else {
             queryWrapper = Wrappers.<UserPortForward>lambdaQuery().eq(UserPortForward::getUserId, userId)
-                    .eq(UserPortForward::getDeleted, false);
+                    .eq(UserPortForward::getDeleted, false)
+                    .orderByDesc(UserPortForward::getRemoteHost)
+                    .orderByAsc(UserPortForward::getDisabled)
+                    .orderByDesc(UserPortForward::getCreateTime);
         }
         Page page = PageHelper.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
         List<UserPortForward> userPortForwardList = userPortForwardDao.selectList(queryWrapper);
@@ -227,8 +235,20 @@ public class UserPortForwardService {
         if (StringUtils.isBlank(userPortForward.getRemoteHost()) || userPortForward.getRemotePort() == null) {
             return ApiResponse.error("401", "请填写域名(IP)|端口");
         }
-        //查询该端口已经存在的转发
         LambdaQueryWrapper<UserPortForward> queryWrapper = Wrappers.<UserPortForward>lambdaQuery()
+                .eq(UserPortForward::getServerId, userPortForward.getServerId())
+                .eq(UserPortForward::getDeleted, false)
+                .eq(UserPortForward::getRemoteHost, userPortForward.getRemoteHost())
+                .eq(UserPortForward::getRemotePort, userPortForward.getRemotePort());
+        if(userPortForward.getId()!=null){
+            queryWrapper = queryWrapper.ne(UserPortForward::getId, userPortForward.getId());
+        }
+        List<UserPortForward> portForwardList = userPortForwardDao.selectList(queryWrapper);
+        if(CollectionUtils.isNotEmpty(portForwardList)){
+            return ApiResponse.error("401", "转发已存在,请使用已存在的转发");
+        }
+        //查询该端口已经存在的转发
+        queryWrapper = Wrappers.<UserPortForward>lambdaQuery()
                 .eq(UserPortForward::getPortId, userPortForward.getPortId()).eq(UserPortForward::getDeleted, false);
         UserPortForward portForward = userPortForwardDao.selectOne(queryWrapper);
         //收集之前的流量

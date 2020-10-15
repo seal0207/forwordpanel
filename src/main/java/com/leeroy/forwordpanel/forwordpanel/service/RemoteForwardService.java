@@ -137,7 +137,7 @@ public class RemoteForwardService {
 
     public String checkIPV4Forward(Server server){
         SSHCommandExecutor sshExecutor = getSshExecutor(server);
-        sshExecutor.executeScript("turnOnNat.sh");
+        sshExecutor.execute("sed -n '/^net.ipv4.ip_forward=1/'p /etc/sysctl.conf | grep -q \"net.ipv4.ip_forward=1\";if [ $? -ne 0 ]; then echo -e \"net.ipv4.ip_forward=1\" >> /etc/sysctl.conf && sysctl -p;fi");
         return sshExecutor.getResult();
     }
 

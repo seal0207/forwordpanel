@@ -20,6 +20,7 @@ import com.leeroy.forwordpanel.forwordpanel.model.Server;
 import com.leeroy.forwordpanel.forwordpanel.model.User;
 import com.leeroy.forwordpanel.forwordpanel.model.UserPortForward;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -293,7 +294,7 @@ public class UserService {
 
 
     public List<User> findExpireUserList(){
-        LambdaQueryWrapper<User> queryWrapper = Wrappers.<User>lambdaQuery().lt(User::getExpireTime, new Date())
+        LambdaQueryWrapper<User> queryWrapper = Wrappers.<User>lambdaQuery().lt(User::getExpireTime, DateUtils.addDays(new Date(), 1))
                 .eq(User::getDeleted, false).eq(User::getDisabled, false);
         return userDao.selectList(queryWrapper);
     }

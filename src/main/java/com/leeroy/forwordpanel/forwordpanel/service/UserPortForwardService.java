@@ -330,6 +330,24 @@ public class UserPortForwardService {
         Matcher matcher = pattern.matcher(ipAddress);
         return matcher.matches();
     }
-
+    /**
+     * 获取所有正在使用中的转发
+     * @return
+     */
+    public List<UserPortForward> getUsingForwards(){
+        LambdaQueryWrapper<UserPortForward> queryWrapper = Wrappers.<UserPortForward>lambdaQuery()
+                .eq(UserPortForward::getDeleted, false).eq(UserPortForward::getDisabled, false);
+        List<UserPortForward> userPortForwards = userPortForwardDao.selectList(queryWrapper);
+        return userPortForwards;
+    }
+    /**
+     * 更新转发信息
+     */
+    public void updateForward(UserPortForward userPortForward, Port port) {
+        Server server = serverDao.selectById(userPortForward.getServerId());
+        forwardService.stopForward(server,userPortForward.getRemoteIp(), userPortForward.getRemotePort(), port.getLocalPort());
+        forwardService.addForward(server,userPortForward.getRemoteIp(), userPortForward.getRemotePort(), port.getLocalPort());
+        userPortForwardDao.updateById(userPortForward);
+    }
 
 }

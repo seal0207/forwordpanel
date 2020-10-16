@@ -98,22 +98,8 @@ public class ServerService {
     }
 
     public PageInfo<Server> getServerPage(PageRequest pageRequest) {
-        LambdaQueryWrapper<UserServer> userServerQueryWrapper = Wrappers.<UserServer>lambdaQuery().eq(UserServer::getDeleted, false);
-        if (WebCurrentData.getUser().getUserType() > 0) {
-            userServerQueryWrapper = userServerQueryWrapper.eq(UserServer::getUserId, WebCurrentData.getUserId());
-        }
         Page<Server> page = PageHelper.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
-        List<UserServer> userServerList = userServerDao.selectList(userServerQueryWrapper);
-        LambdaQueryWrapper<Server> queryWrapper = Wrappers.<Server>lambdaQuery().eq(Server::getDeleted, false);
-        List<Server> serverList = serverDao.selectList(queryWrapper);
-        serverList = serverList.stream().filter(server -> {
-            for (UserServer userServer : userServerList) {
-                if (server.getId().equals(userServer.getServerId())) {
-                    return true;
-                }
-            }
-            return false;
-        }).collect(Collectors.toList());
+        List<Server> serverList = serverDao.selectUserServer(WebCurrentData.getUserId());
         serverList.stream().forEach(server -> {
             server.setPassword("******");
         });

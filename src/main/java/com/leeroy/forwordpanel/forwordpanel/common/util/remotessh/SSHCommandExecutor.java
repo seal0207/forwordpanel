@@ -119,7 +119,8 @@ public class SSHCommandExecutor {
     public void executeScript(final String script) {
         try {
             List<String> commandList = new ArrayList<>();
-            BufferedReader br = new BufferedReader(new FileReader(ResourceUtils.getFile("classpath:scripts/" + script)));
+            ClassPathResource resource = new ClassPathResource("scripts/" + script);
+            BufferedReader br = new BufferedReader(new InputStreamReader(resource.getInputStream()));
             String str;
             while ((str = br.readLine()) != null) {
                 commandList.add(str);

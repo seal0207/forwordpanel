@@ -101,11 +101,8 @@ public class SSHCommandExecutor {
             }
 
             session.disconnect();
-        } catch (JSchException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("执行shell失败", e);
         }
         log.info("shell result: {}", StringUtils.join(stdout));
         return returnCode;

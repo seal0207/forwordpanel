@@ -54,6 +54,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
             renderResponse(response, "403", "登录超时, 请重新登录");
             return false;
         }
+        userToken.setExpireTime(userToken.getExpireTime()+1000*60*30);
+        userTokenService.updateUserToken(userToken);
         //当前用户
         User user = userDao.selectById(userToken.getUserId());
         WebCurrentData.setUser(user);

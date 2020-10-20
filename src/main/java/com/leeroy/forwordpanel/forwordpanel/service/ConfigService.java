@@ -70,8 +70,6 @@ public class ConfigService {
         DumperOptions dumperOptions = new DumperOptions();
 
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        dumperOptions.setIndicatorIndent(2);
-        dumperOptions.setIndent(2);
         dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
         Yaml yaml = new Yaml(dumperOptions);
         JSONObject jsonObject = yaml.loadAs(clash.getText(), JSONObject.class);

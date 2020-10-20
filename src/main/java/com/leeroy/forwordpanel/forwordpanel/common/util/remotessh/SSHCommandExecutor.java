@@ -101,11 +101,8 @@ public class SSHCommandExecutor {
             }
 
             session.disconnect();
-        } catch (JSchException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("执行shell失败", e);
         }
         log.info("shell result: {}", StringUtils.join(stdout));
         return returnCode;
@@ -119,7 +116,8 @@ public class SSHCommandExecutor {
     public void executeScript(final String script) {
         try {
             List<String> commandList = new ArrayList<>();
-            BufferedReader br = new BufferedReader(new FileReader(ResourceUtils.getFile("classpath:scripts/" + script)));
+            ClassPathResource resource = new ClassPathResource("scripts/" + script);
+            BufferedReader br = new BufferedReader(new InputStreamReader(resource.getInputStream()));
             String str;
             while ((str = br.readLine()) != null) {
                 commandList.add(str);

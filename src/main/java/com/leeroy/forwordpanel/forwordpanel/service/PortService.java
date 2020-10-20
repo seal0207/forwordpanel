@@ -14,6 +14,7 @@ import com.leeroy.forwordpanel.forwordpanel.dto.PortAddDTO;
 import com.leeroy.forwordpanel.forwordpanel.dto.PortDTO;
 import com.leeroy.forwordpanel.forwordpanel.dto.PortPageRequest;
 import com.leeroy.forwordpanel.forwordpanel.model.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +25,12 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class PortService {
 
@@ -38,6 +42,8 @@ public class PortService {
 
     @Autowired
     private UserPortDao userPortDao;
+
+    private static ExecutorService executorService = Executors.newFixedThreadPool(10);
 
 
     /**
@@ -80,6 +86,9 @@ public class PortService {
         if(localPort.indexOf("-")<=0&&(!StringUtils.isEmpty(internetPort)&&internetPort.indexOf("-")>0)){
             return ApiResponse.error("400", "端口格式错误");
         }
+        if(getRange(localPort)>65535){
+            return ApiResponse.error("400", "端口一次最多新增65535个");
+        }
         if(!StringUtils.isEmpty(internetPort)&&getRange(localPort)!=getRange(internetPort)){
             return ApiResponse.error("400", "端口区间范围不匹配");
         }
@@ -89,21 +98,58 @@ public class PortService {
         for (int i = 0; i < localPortList.size(); i++) {
             Integer addLocalPort = localPortList.get(i);
             Integer addInternetPort = internetPortList.get(i);
-            LambdaQueryWrapper<Port> queryWrapper = Wrappers.<Port>lambdaQuery()
-                    .eq(Port::getDeleted, false)
-                    .eq(Port::getServerId, portAddDTO.getServerId())
-                    .eq(Port::getLocalPort, addLocalPort);
-            List<Port> port = portDao.selectList(queryWrapper);
-            if (!CollectionUtils.isEmpty(port)) {
-                continue;
-            }
-            Port addPort = new Port();
-            addPort.setServerId(portAddDTO.getServerId());
-            addPort.setLocalPort(addLocalPort);
-            addPort.setInternetPort(addInternetPort);
-            addPort.setDeleted(false);
-            addPort.setCreateTime(new Date());
-            portDao.insert(addPort);
+            executorService.execute(() -> {
+                LambdaQueryWrapper<Port> queryWrapper = Wrappers.<Port>lambdaQuery()
+                        .eq(Port::getDeleted, false)
+                        .eq(Port::getServerId, portAddDTO.getServerId())
+                        .eq(Port::getLocalPort, addLocalPort);
+                List<Port> port = portDao.selectList(queryWrapper);
+                if (!CollectionUtils.isEmpty(port)) {
+                    return;
+                }
+                Port addPort = new Port();
+                addPort.setServerId(portAddDTO.getServerId());
+                addPort.setLocalPort(addLocalPort);
+                addPort.setInternetPort(addInternetPort);
+                addPort.setDeleted(false);
+                addPort.setCreateTime(new Date());
+                portDao.insert(addPort);
+            });
+
+        }
+        return ApiResponse.ok();
+    }
+
+    /**
+     * 保存clash
+     */
+    public ApiResponse batchDelete(PortAddDTO portAddDTO) {
+        String localPort = portAddDTO.getLocalPort();
+        if(!checkPort(localPort)){
+            return ApiResponse.error("400", "端口格式错误");
+        }
+        if(localPort.indexOf("-")<=0){
+            return ApiResponse.error("400", "端口格式错误");
+        }
+        if(getRange(localPort)>65535){
+            return ApiResponse.error("400", "端口一次最多新增65535个");
+        }
+        List<Integer> localPortList = getPortAddList(localPort);
+        for (int i = 0; i < localPortList.size(); i++) {
+            Integer addLocalPort = localPortList.get(i);
+            executorService.execute(() -> {
+                List<Port> portList = userPortDao.selectByLocalPort(addLocalPort, portAddDTO.getServerId());
+                if (!CollectionUtils.isEmpty(portList)) {
+                    return;
+                }
+                LambdaQueryWrapper<Port> queryWrapper = Wrappers.<Port>lambdaQuery().eq(Port::getServerId, portAddDTO.getServerId())
+                        .eq(Port::getLocalPort, addLocalPort)
+                        .eq(Port::getDeleted, false);
+                Port userPort = new Port();
+                userPort.setDeleted(true);
+                portDao.update(userPort,queryWrapper);
+            });
+
         }
         return ApiResponse.ok();
     }

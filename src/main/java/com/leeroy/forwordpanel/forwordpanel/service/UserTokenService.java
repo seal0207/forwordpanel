@@ -39,6 +39,11 @@ public class UserTokenService {
         }
     }
 
+    public void updateUserToken(UserToken userToken){
+       userTokenDao.update(userToken,  Wrappers.<UserToken>lambdaQuery().eq(UserToken::getUserId, userToken.getUserId()).eq(UserToken::getToken, userToken.getToken()));
+    }
+
+
     /**
      * 获取用户token
      * @param token

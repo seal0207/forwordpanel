@@ -32,6 +32,13 @@ public class ServerController {
         return ApiResponse.ok(serverService.findList());
     }
 
+
+    @ResponseBody
+    @GetMapping("getForwardServerList")
+    public ApiResponse getForwardServerList(Integer userId) {
+        return ApiResponse.ok(serverService.getForwardServerList(userId));
+    }
+
     @ResponseBody
     @RequestMapping(value = "save", method = RequestMethod.POST)
     public ApiResponse saveUserPort(@RequestBody Server server) {

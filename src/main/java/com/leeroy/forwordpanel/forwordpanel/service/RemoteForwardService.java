@@ -1,7 +1,6 @@
 package com.leeroy.forwordpanel.forwordpanel.service;
 
 import com.alibaba.fastjson.JSON;
-import com.leeroy.forwordpanel.forwordpanel.common.util.ShellUtil;
 import com.leeroy.forwordpanel.forwordpanel.common.util.remotessh.SSHCommandExecutor;
 import com.leeroy.forwordpanel.forwordpanel.model.Server;
 import lombok.extern.slf4j.Slf4j;
@@ -53,11 +52,13 @@ public class RemoteForwardService {
             localIp = sshExecutor.getResult();
         }
         sshExecutor.executeScript("turnOnNat.sh");
-        sshExecutor.execute((String.format("iptables -t nat -A PREROUTING -p tcp --dport %d -j DNAT --to-destination %s:%d", localPort, remoteHost, remotePort)));
-        sshExecutor.execute((String.format("iptables -t nat -A PREROUTING -p udp --dport %d -j DNAT --to-destination %s:%d", localPort, remoteHost, remotePort)));
-        sshExecutor.execute((String.format("iptables -t nat -A POSTROUTING -p tcp -d %s --dport %d -j SNAT --to-source %s", remoteHost, remotePort, localIp)));
-        sshExecutor.execute((String.format("iptables -t nat -A POSTROUTING -p udp -d %s --dport %d -j SNAT --to-source %s", remoteHost, remotePort, localIp)));
-        sshExecutor.execute((String.format("iptables -n -v -L -t filter -x | grep %s | awk '{print $2}'", remoteHost)));
+        sshExecutor.execute(
+                (String.format("iptables -t nat -A PREROUTING -p tcp --dport %d -j DNAT --to-destination %s:%d", localPort, remoteHost, remotePort)),
+                (String.format("iptables -t nat -A PREROUTING -p udp --dport %d -j DNAT --to-destination %s:%d", localPort, remoteHost, remotePort)),
+                (String.format("iptables -t nat -A POSTROUTING -p tcp -d %s --dport %d -j SNAT --to-source %s", remoteHost, remotePort, localIp)),
+                (String.format("iptables -t nat -A POSTROUTING -p udp -d %s --dport %d -j SNAT --to-source %s", remoteHost, remotePort, localIp)),
+                (String.format("iptables -n -v -L -t filter -x | grep %s | awk '{print $2}'", remoteHost))
+        );
         String flow = sshExecutor.getResult();
         log.info("fow: {}", flow);
         if (StringUtils.isEmpty(flow)) {

@@ -68,10 +68,12 @@ public class ServerService {
             testConnect(server);
         } else {
             Server existPort = serverDao.selectById(server.getId());
+            String password = StringUtils.isEmpty(server.getPassword())?existPort.getPassword():server.getPassword();
             BeanUtils.copyProperties(server, existPort);
             existPort.setUpdateTime(new Date());
             existPort.setState(ServerStatusEnum.INIT.getCode());
             serverDao.updateById(existPort);
+            existPort.setPassword(password);
             testConnect(existPort);
 
         }
@@ -98,28 +100,23 @@ public class ServerService {
     }
 
     public PageInfo<Server> getServerPage(PageRequest pageRequest) {
-        LambdaQueryWrapper<UserServer> userServerQueryWrapper = Wrappers.<UserServer>lambdaQuery().eq(UserServer::getDeleted, false);
-        if (WebCurrentData.getUser().getUserType() > 0) {
-            userServerQueryWrapper = userServerQueryWrapper.eq(UserServer::getUserId, WebCurrentData.getUserId());
-        }
         Page<Server> page = PageHelper.startPage(pageRequest.getPageNum(), pageRequest.getPageSize());
-        List<UserServer> userServerList = userServerDao.selectList(userServerQueryWrapper);
-        LambdaQueryWrapper<Server> queryWrapper = Wrappers.<Server>lambdaQuery().eq(Server::getDeleted, false);
-        List<Server> serverList = serverDao.selectList(queryWrapper);
-        serverList = serverList.stream().filter(server -> {
-            for (UserServer userServer : userServerList) {
-                if (server.getId().equals(userServer.getServerId())) {
-                    return true;
-                }
-            }
-            return false;
-        }).collect(Collectors.toList());
+        List<Server> serverList = serverDao.selectUserServer(WebCurrentData.getUserId());
         serverList.stream().forEach(server -> {
             server.setPassword("******");
         });
         PageInfo<Server> pageInfo = page.toPageInfo();
         pageInfo.setList(serverList);
         return pageInfo;
+    }
+
+
+    public List<Server> getForwardServerList(Integer userId) {
+        List<Server> serverList = serverDao.selectForwardServer(userId);
+        serverList.stream().forEach(server -> {
+            server.setPassword("******");
+        });
+        return serverList;
     }
 
     /**
